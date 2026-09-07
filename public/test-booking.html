@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Booking Modal</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        .test-btn {
+            background: #059669;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-btn:hover {
+            background: #047857;
+        }
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .info-box {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d1fae5;
+            border-color: #059669;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Booking Modal System</h1>
+    
+    <div class="info-box">
+        <strong>Status:</strong>
+        <div id="status">Checking Alpine.js...</div>
+    </div>
+
+    <h2>Test Buttons:</h2>
+    
+    <!-- Test Button 1: Using Alpine @click -->
+    <button 
+        @click="$dispatch('booking-modal:open', { id: 1, nama: 'Test Paket 1', harga: 75000 })"
+        class="test-btn">
+        Test 1: Alpine @click Dispatch
+    </button>
+
+    <!-- Test Button 2: Using plain JavaScript -->
+    <button 
+        onclick="testJsDispatch()"
+        class="test-btn">
+        Test 2: JavaScript Dispatch
+    </button>
+
+    <!-- Test Button 3: Open simple modal -->
+    <button 
+        @click="showSimpleModal = true"
+        class="test-btn">
+        Test 3: Simple Alpine Modal
+    </button>
+
+    <!-- Simple Test Modal -->
+    <div x-data="{ showSimpleModal: false }">
+        <div x-show="showSimpleModal" class="modal-backdrop" @click.self="showSimpleModal = false">
+            <div class="modal-content">
+                <h2>✅ Alpine.js Working!</h2>
+                <p>If you can see this modal, Alpine.js is loaded correctly.</p>
+                <button @click="showSimpleModal = false" class="close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actual Booking Modal Test -->
+    <div x-data="testBookingModal()" 
+         @booking-modal:open.window="openModal($event.detail)">
+        <div x-show="isOpen" class="modal-backdrop" @click.self="isOpen = false">
+            <div class="modal-content">
+                <h2>🎫 Booking Modal</h2>
+                <div class="info-box success">
+                    <p><strong>Paket:</strong> <span x-text="paket?.nama"></span></p>
+                    <p><strong>Harga:</strong> Rp <span x-text="paket?.harga?.toLocaleString('id-ID')"></span></p>
+                    <p><strong>ID:</strong> <span x-text="paket?.id"></span></p>
+                </div>
+                <button @click="isOpen = false" class="close-btn">Close Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check Alpine.js loaded
+        document.addEventListener('alpine:init', () => {
+            document.getElementById('status').innerHTML = '<span class="success">✅ Alpine.js loaded successfully!</span>';
+        });
+
+        // Test JavaScript dispatch
+        function testJsDispatch() {
+            console.log('Dispatching event manually...');
+            window.dispatchEvent(new CustomEvent('booking-modal:open', {
+                detail: { id: 2, nama: 'Test Paket 2 (JS)', harga: 150000 }
+            }));
+        }
+
+        // Test booking modal Alpine component
+        function testBookingModal() {
+            return {
+                isOpen: false,
+                paket: null,
+                
+                openModal(data) {
+                    console.log('Modal opening with data:', data);
+                    this.paket = data;
+                    this.isOpen = true;
+                    document.getElementById('status').innerHTML = '<span class="success">✅ Booking modal opened!</span>';
+                },
+            }
+        }
+
+        // Show Alpine status after 1 second
+        setTimeout(() => {
+            const statusEl = document.getElementById('status');
+            if (typeof Alpine === 'undefined') {
+                statusEl.innerHTML = '<span class="error">❌ Alpine.js NOT loaded!</span>';
+            } else {
+                statusEl.innerHTML = '<span class="success">✅ Alpine.js loaded (version: ' + Alpine.version + ')</span>';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

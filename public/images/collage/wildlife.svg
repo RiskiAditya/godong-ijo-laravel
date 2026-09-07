@@ -1,0 +1,14 @@
+<svg width="1200" height="1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="wildlifeGrad">
+      <stop offset="0%" style="stop-color:#5FB878;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A4D2E;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#wildlifeGrad)"/>
+  <circle cx="400" cy="400" r="80" fill="#D4A574" opacity="0.2"/>
+  <circle cx="800" cy="800" r="100" fill="#D4A574" opacity="0.2"/>
+  <circle cx="600" cy="600" r="120" fill="#D4A574" opacity="0.3"/>
+  <text x="600" y="560" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="80" font-weight="bold">🦜</text>
+  <text x="600" y="680" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="38">Diverse Wildlife</text>
+</svg>

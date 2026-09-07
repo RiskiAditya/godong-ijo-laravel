@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Godong Ijo — Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10160F; --ink-70:#4A544B; --ink-45:#8A9285;
+    --line:#E2E4DC; --line-strong:#CBD0C4;
+    --surface:#FFFFFF; --bg:#F4F5F0;
+    --brand:#1F5D3E; --brand-dark:#123423; --brand-soft:#E9F0EA;
+    --gold:#8C6A1E; --gold-soft:#F6EEDC;
+    --red:#AE3226; --red-soft:#FBEDEB;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans',sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; font-size:14px;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--brand); outline-offset:2px;}
+  ::selection{background:var(--brand-soft);}
+
+  .app{display:grid; grid-template-columns:236px 1fr; min-height:100vh;}
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{background:var(--brand-dark); color:#CFDDD3; display:flex; flex-direction:column; border-right:1px solid rgba(255,255,255,0.06);}
+  .brand{display:flex; align-items:center; gap:10px; padding:20px 20px 18px; border-bottom:1px solid rgba(255,255,255,0.08);}
+  .brand-mark{width:26px;height:26px; flex-shrink:0; color:#7BAE8E;}
+  .brand-text{line-height:1.15;}
+  .brand-name{font-weight:600; font-size:14.5px; color:#fff; letter-spacing:-0.01em;}
+  .brand-tag{font-size:10.5px; color:#7C9584; letter-spacing:.04em; text-transform:uppercase; margin-top:2px;}
+  .env-row{display:flex; align-items:center; gap:7px; margin:14px 20px 6px; font-size:11px; color:#7C9584; letter-spacing:.05em; text-transform:uppercase; font-weight:600;}
+  .env-dot{width:6px;height:6px;border-radius:50%; background:#5FBE8A; box-shadow:0 0 0 3px rgba(95,190,138,0.15);}
+  .nav{list-style:none; margin:8px 0; padding:0;}
+  .nav a{display:flex; align-items:center; gap:10px; padding:8px 20px 8px 17px; font-size:13px; font-weight:500; color:#A9BCAE; border-left:3px solid transparent; cursor:pointer;}
+  .nav a svg{opacity:.75; flex-shrink:0;}
+  .nav a:hover{color:#fff; background:rgba(255,255,255,0.03);}
+  .nav a.active{color:#fff; font-weight:600; background:rgba(255,255,255,0.045); border-left-color:#5FBE8A;}
+  .nav a.active svg{opacity:1;}
+  .nav-count{margin-left:auto; font-size:10.5px; font-weight:600; color:#7C9584; font-family:'IBM Plex Mono',monospace;}
+  .nav-section{margin-top:6px;}
+  .nav-section-title{padding:14px 20px 6px; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:#5E7768; font-weight:600;}
+  .sidebar-bottom{margin-top:auto; border-top:1px solid rgba(255,255,255,0.08); padding:14px 20px;}
+  .sidebar-user{display:flex; align-items:center; gap:9px; margin-bottom:12px;}
+  .sidebar-avatar{width:28px;height:28px;border-radius:5px; background:#1F5D3E; border:1px solid rgba(255,255,255,0.15); display:flex;align-items:center;justify-content:center; color:#fff; font-size:11.5px; font-weight:600; font-family:'IBM Plex Mono',monospace;}
+  .sidebar-user-name{font-size:12.5px; font-weight:600; color:#fff; line-height:1.2;}
+  .sidebar-user-role{font-size:10.5px; color:#7C9584;}
+  .logout-link{display:flex; align-items:center; gap:8px; font-size:12.5px; color:#93A897; font-weight:500;}
+  .logout-link:hover{color:#fff;}
+
+  /* ============ TOPBAR ============ */
+  .main{display:flex; flex-direction:column; min-width:0;}
+  .topbar{display:flex; align-items:center; gap:16px; padding:0 28px; height:56px; background:var(--surface); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;}
+  .crumb{display:flex; align-items:center; gap:7px; font-size:13px; white-space:nowrap;}
+  .crumb .dim{color:var(--ink-45);}
+  .crumb .cur{font-weight:600;}
+  .search{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:6px; padding:6px 10px; width:280px; margin-left:24px; color:var(--ink-45);}
+  .search input{border:none; outline:none; background:transparent; font-size:13px; width:100%; color:var(--ink); font-family:inherit;}
+  .search:focus-within{border-color:var(--brand);}
+  .kbd{font-family:'IBM Plex Mono',monospace; font-size:10.5px; border:1px solid var(--line); border-radius:4px; padding:1px 5px; color:var(--ink-45);}
+  .topbar-right{margin-left:auto; display:flex; align-items:center; gap:8px;}
+  .icon-btn{width:32px;height:32px; border-radius:6px; border:1px solid var(--line); background:var(--surface); display:flex;align-items:center;justify-content:center; color:var(--ink-70); cursor:pointer; position:relative;}
+  .icon-btn:hover{background:var(--bg);}
+  .divider-v{width:1px; height:22px; background:var(--line); margin:0 2px;}
+  .profile-btn{display:flex; align-items:center; gap:8px; padding:4px 6px 4px 4px; border-radius:6px; cursor:pointer;}
+  .profile-btn:hover{background:var(--bg);}
+  .avatar-sm{width:26px;height:26px;border-radius:5px; background:var(--brand); color:#fff; display:flex;align-items:center;justify-content:center; font-size:11px; font-weight:600; font-family:'IBM Plex Mono',monospace;}
+
+  /* ============ CONTENT ============ */
+  .content{padding:26px 28px 60px;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  .page-head{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; gap:16px; flex-wrap:wrap;}
+  .page-title-row{display:flex; align-items:center; gap:10px;}
+  .page-head h1{margin:0; font-size:20px; font-weight:600; letter-spacing:-0.01em;}
+  .live-chip{display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:600; color:var(--brand); background:var(--brand-soft); padding:2.5px 8px; border-radius:100px; letter-spacing:.03em; text-transform:uppercase;}
+  .live-dot{width:5px;height:5px;border-radius:50%; background:var(--brand);}
+  .page-sub{margin:5px 0 0; font-size:12.5px; color:var(--ink-45);}
+  .head-actions{display:flex; gap:8px;}
+  .btn-ghost{display:flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--surface); padding:8px 13px; border-radius:6px; font-size:12.5px; font-weight:600; color:var(--ink-70); cursor:pointer;}
+  .btn-ghost:hover{background:var(--bg); border-color:var(--line-strong);}
+  .btn-solid{display:flex; align-items:center; gap:6px; background:var(--brand-dark); color:#fff; border:1px solid var(--brand-dark); padding:8px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .btn-solid:hover{background:#0D2A1D;}
+
+  /* ---- Stat strip ---- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden; margin-bottom:22px;}
+  .stat{padding:16px 20px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:8px;}
+  .stat:last-child{border-right:none;}
+  .stat-label{font-size:11px; color:var(--ink-45); font-weight:600; text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:6px;}
+  .stat-value{font-size:24px; font-weight:600; font-family:'IBM Plex Mono',monospace; letter-spacing:-0.01em;}
+  .stat-foot{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .stat-delta{font-size:11.5px; font-weight:600; display:flex; align-items:center; gap:3px;}
+  .stat-delta.pos{color:var(--brand);}
+  .stat-delta.warn{color:var(--gold);}
+  .stat-delta.flat{color:var(--ink-45); font-weight:500;}
+  .spark{display:block;}
+
+  /* ---- grid split ---- */
+  .grid-main{display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start;}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  .panel-head{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap;}
+  .panel-head h2{margin:0; font-size:13.5px; font-weight:600;}
+  .panel-head .count{color:var(--ink-45); font-weight:500; font-size:12px; margin-left:6px;}
+  .tabs{display:flex; gap:2px; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:2px;}
+  .tab{padding:5px 10px; font-size:11.5px; font-weight:600; color:var(--ink-70); border-radius:4px; cursor:pointer;}
+  .tab.active{background:var(--surface); color:var(--ink); border:1px solid var(--line);}
+  .subbar{padding:10px 18px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .subbar .search{margin-left:0; width:100%; max-width:320px;}
+
+  table{width:100%; border-collapse:collapse;}
+  thead th{text-align:left; padding:9px 18px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-45); border-bottom:1px solid var(--line); background:var(--bg); white-space:nowrap;}
+  thead th.num{text-align:right;}
+  tbody td{padding:12px 18px; font-size:12.5px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FBFBF9;}
+  td.num{text-align:right; font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-70);}
+  .cust{display:flex; align-items:center; gap:9px;}
+  .cust-avatar{width:24px;height:24px;border-radius:5px; background:var(--brand-soft); color:var(--brand); display:flex;align-items:center;justify-content:center; font-size:10.5px; font-weight:700; font-family:'IBM Plex Mono',monospace; flex-shrink:0;}
+  .cust-name{font-weight:600;}
+  .status{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;}
+  .status-dot{width:6px;height:6px;border-radius:50%;}
+  .status.lunas{color:var(--brand);} .status.lunas .status-dot{background:var(--brand);}
+  .status.pending{color:var(--gold);} .status.pending .status-dot{background:var(--gold);}
+  .date-txt{color:var(--ink-70); font-size:12px; font-family:'IBM Plex Mono',monospace;}
+  .row-action{width:26px;height:26px;border-radius:5px; border:1px solid transparent; background:transparent; display:flex;align-items:center;justify-content:center; color:var(--ink-45); cursor:pointer;}
+  .row-action:hover{background:var(--bg); border-color:var(--line); color:var(--ink-70);}
+  .row-action.danger:hover{color:var(--red); border-color:#F3D2CE; background:var(--red-soft);}
+  .panel-foot{display:flex; align-items:center; justify-content:space-between; padding:10px 18px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-45);}
+  .pager{display:flex; gap:4px;}
+  .pager button{min-width:24px; height:24px; padding:0 6px; border-radius:5px; border:1px solid var(--line); background:var(--surface); color:var(--ink-70); font-size:11.5px; cursor:pointer; font-family:'IBM Plex Mono',monospace;}
+  .pager button.active{background:var(--brand-dark); color:#fff; border-color:var(--brand-dark); font-weight:700;}
+  .pager button:disabled{opacity:.4; cursor:not-allowed;}
+
+  .side-stack{display:flex; flex-direction:column; gap:16px;}
+  .pkg-row{padding:12px 18px; border-bottom:1px solid var(--line);}
+  .pkg-row:last-child{border-bottom:none;}
+  .pkg-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; gap:8px;}
+  .pkg-name{font-size:12.5px; font-weight:600;}
+  .pkg-rev{font-size:12px; font-weight:600; font-family:'IBM Plex Mono',monospace; color:var(--ink-70); white-space:nowrap;}
+  .pkg-meta{font-size:11px; color:var(--ink-45); margin-bottom:7px;}
+  .bar-track{height:4px; border-radius:2px; background:var(--bg); overflow:hidden;}
+  .bar-fill{height:100%; background:var(--brand);}
+  .note{margin:12px 18px 16px; padding:11px 12px; background:var(--bg); border:1px solid var(--line); border-radius:6px; display:flex; gap:8px; align-items:flex-start; color:var(--ink-70); font-size:11.5px; line-height:1.5;}
+  .note svg{flex-shrink:0; margin-top:1px; color:var(--ink-45);}
+  .quick-list{padding:6px 8px 10px;}
+  .quick-item{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:6px; font-size:12.5px; font-weight:600; color:var(--ink); cursor:pointer; border:none; background:none; width:100%; text-align:left;}
+  .quick-item:hover{background:var(--bg);}
+  .quick-item svg{color:var(--ink-45); flex-shrink:0;}
+  .quick-item .arrow{margin-left:auto; opacity:.4;}
+
+  .placeholder-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 20px;text-align:center;color:var(--ink-45);}
+  .placeholder-panel svg{margin-bottom:14px;color:var(--line-strong);}
+  .placeholder-panel h3{margin:0 0 6px;color:var(--ink-70);font-size:14px;}
+  .placeholder-panel p{margin:0 0 18px;font-size:12.5px;max-width:340px; line-height:1.6;}
+
+  /* ---- reports ---- */
+  .report-stats{display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden; margin-bottom:20px;}
+  .chart-wrap{padding:18px 20px 10px;}
+  .chart-wrap svg{display:block; width:100%; height:auto;}
+
+  /* ---- activity ---- */
+  .activity-item{display:flex; gap:12px; padding:14px 18px; border-bottom:1px solid var(--line);}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .act-booking{background:var(--brand-soft); color:var(--brand);}
+  .act-package{background:var(--gold-soft); color:var(--gold);}
+  .act-system{background:var(--bg); color:var(--ink-70); border:1px solid var(--line);}
+  .activity-body{flex:1; min-width:0;}
+  .activity-msg{font-size:13px; font-weight:500; color:var(--ink);}
+  .activity-meta{font-size:11px; color:var(--ink-45); margin-top:3px; font-family:'IBM Plex Mono',monospace;}
+
+  /* ---- modal ---- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(16,22,15,0.5); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal{background:#fff; border-radius:10px; width:100%; max-width:440px; box-shadow:0 24px 60px rgba(0,0,0,0.25); max-height:92vh; overflow-y:auto;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:#fff;}
+  .modal-head h3{margin:0; font-size:15px; font-weight:600;}
+  .modal-close{background:none; border:none; font-size:20px; line-height:1; color:var(--ink-45); cursor:pointer; width:28px; height:28px; border-radius:6px;}
+  .modal-close:hover{background:var(--bg);}
+  .modal form{padding:18px 20px 20px;}
+  .form-group{margin-bottom:14px; display:flex; flex-direction:column; gap:6px;}
+  .form-group label{font-size:12px;font-weight:600;color:var(--ink-70);}
+  .form-group input, .form-group select, .form-group textarea{border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--ink); width:100%;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--brand); outline:none;}
+  .form-group textarea{resize:vertical; min-height:64px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .total-preview{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--ink-70);margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;}
+  .total-preview strong{font-family:'IBM Plex Mono',monospace;color:var(--ink);font-size:14px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;}
+  .hint{font-size:11px;color:var(--ink-45);}
+
+  /* ---- toast ---- */
+  #toastContainer{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px; align-items:flex-end;}
+  .toast{background:var(--ink);color:#fff;padding:10px 14px;border-radius:7px;font-size:12.5px;font-weight:500;box-shadow:0 6px 20px rgba(0,0,0,0.2);display:flex;align-items:center;gap:8px; transition:opacity .3s, transform .3s;}
+  .toast.success{background:var(--brand-dark);}
+  .toast.error{background:var(--red);}
+
+  @media (max-width:1060px){ .grid-main{grid-template-columns:1fr;} .stats{grid-template-columns:repeat(2,1fr);} .stat:nth-child(2){border-right:none;} }
+  @media (max-width:820px){ .app{grid-template-columns:1fr;} .sidebar{display:none;} .search{display:none;} .stats{grid-template-columns:1fr;} .stat{border-right:none; border-bottom:1px solid var(--line);} .form-row{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none">
+        <path d="M12 21c-4.5-.6-7.5-3.8-7.5-9C4.5 6.8 8 3.5 13 3c-.3 5-1.3 8-4 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M12 21V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <div class="brand-name">Godong Ijo</div>
+        <div class="brand-tag">Operations Console</div>
+      </div>
+    </div>
+    <div class="env-row"><span class="env-dot"></span> Sistem Aktif</div>
+
+    <ul class="nav">
+      <li><a href="#" class="nav-link active" data-page="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="#" class="nav-link" data-page="booking">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="1.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+        Booking
+        <span class="nav-count" id="navBookingCount">00</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-page="packages">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Paket Wisata
+      </a></li>
+      <li><a href="#" class="nav-link" data-page="customers">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3.5 20c1-3.5 3.3-5.3 5.5-5.3s4.5 1.8 5.5 5.3"/><circle cx="17.5" cy="8.8" r="2.2"/><path d="M15.7 14.9c1.9.3 3.4 1.9 4.2 4.5"/></svg>
+        Pelanggan
+      </a></li>
+    </ul>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Analitik</div>
+      <ul class="nav">
+        <li><a href="#" class="nav-link" data-page="reports">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+          Laporan
+        </a></li>
+        <li><a href="#" class="nav-link" data-page="activity">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          Riwayat Aktivitas
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Sistem</div>
+      <ul class="nav">
+        <li><a href="#" class="nav-link" data-page="settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+          Pengaturan
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">AD</div>
+        <div>
+          <div class="sidebar-user-name">Administrator</div>
+          <div class="sidebar-user-role">Super Admin</div>
+        </div>
+      </div>
+      <a href="#" class="logout-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Keluar
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="crumb"><span class="dim">Godong Ijo</span><span class="dim">/</span><span class="cur" id="crumbCurrent">Dashboard</span></div>
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="globalSearch" placeholder="Cari booking, pelanggan…">
+        <span class="kbd">⌘K</span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="Notifikasi" title="Tidak ada notifikasi baru">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </button>
+        <div class="divider-v"></div>
+        <div class="profile-btn" title="Administrator">
+          <div class="avatar-sm">AD</div>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--ink-45)"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <div class="page-title-row">
+            <h1 id="pageTitle">Dashboard</h1>
+            <span class="live-chip" id="liveChip"><span class="live-dot"></span>Live</span>
+          </div>
+          <p class="page-sub" id="pageSub">Ringkasan operasional booking dan pendapatan.</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn-ghost" id="btnExport">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+            Ekspor
+          </button>
+          <button class="btn-solid" id="btnPrimary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            <span id="btnPrimaryLabel">Booking Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================== DASHBOARD PAGE ===================== -->
+      <div class="page active" id="page-dashboard">
+        <section class="stats">
+          <div class="stat">
+            <div class="stat-label">Booking Hari Ini</div>
+            <div class="stat-value" id="statToday">0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="statTodayNote">—</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Booking Bulan Ini</div>
+            <div class="stat-value" id="statMonth">0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="statMonthNote">—</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Total Pendapatan</div>
+            <div class="stat-value" id="statRevenue">Rp0</div>
+            <div class="stat-foot">
+              <span class="stat-delta pos" id="statRevenueNote">—</span>
+              <svg class="spark" width="64" height="22" viewBox="0 0 64 22" fill="none">
+                <path id="sparkPath" d="M1 20 L63 20" stroke="#1F5D3E" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle id="sparkDot" cx="63" cy="20" r="2" fill="#1F5D3E"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Booking Pending</div>
+            <div class="stat-value" id="statPending">0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="statPendingNote">—</span></div>
+          </div>
+        </section>
+
+        <section class="grid-main">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Booking Terbaru<span class="count" id="recentCountLabel"></span></h2>
+              <button class="btn-ghost" style="padding:5px 10px;" onclick="navigate('booking')">
+                Lihat Semua
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <table>
+              <thead><tr><th>Kode Booking</th><th>Pelanggan</th><th>Paket</th><th class="num">Total</th><th>Status</th><th>Tanggal</th><th></th></tr></thead>
+              <tbody id="recentBookingsBody"></tbody>
+            </table>
+          </div>
+
+          <div class="side-stack">
+            <div class="panel">
+              <div class="panel-head"><h2>Paket Terlaris</h2></div>
+              <div id="pkgPopularityList"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>Aksi Cepat</h2></div>
+              <div class="quick-list">
+                <button class="quick-item" onclick="navigate('packages'); setTimeout(()=>openPackageModal(),0);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+                  Tambah Paket Wisata
+                  <svg class="arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+                <button class="quick-item" onclick="exportCSV('bookings')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+                  Unduh Laporan Booking
+                  <svg class="arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+                <button class="quick-item" onclick="navigate('customers')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3.5 20c1-3.5 3.3-5.3 5.5-5.3s4.5 1.8 5.5 5.3"/></svg>
+                  Kelola Data Pelanggan
+                  <svg class="arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===================== BOOKING PAGE ===================== -->
+      <div class="page" id="page-booking">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Semua Booking<span class="count" id="bookingCountLabel"></span></h2>
+            <div class="tabs" id="bookingTabs">
+              <div class="tab active" data-filter="all">Semua</div>
+              <div class="tab" data-filter="lunas">Lunas</div>
+              <div class="tab" data-filter="pending">Pending</div>
+            </div>
+          </div>
+          <div class="subbar">
+            <div class="search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="bookingPageSearch" placeholder="Cari kode, pelanggan, atau paket…">
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Kode Booking</th><th>Pelanggan</th><th>Paket</th><th class="num">Total</th><th>Status</th><th>Tanggal</th><th></th></tr></thead>
+            <tbody id="bookingTableFullBody"></tbody>
+          </table>
+          <div class="panel-foot">
+            <span id="bookingPagerInfo">Menampilkan 0 dari 0</span>
+            <div class="pager" id="bookingPager"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PACKAGES PAGE ===================== -->
+      <div class="page" id="page-packages">
+        <div class="panel">
+          <div class="panel-head"><h2>Daftar Paket Wisata<span class="count" id="pkgCountLabel"></span></h2></div>
+          <table>
+            <thead><tr><th>Paket</th><th>Kategori</th><th class="num">Harga / Peserta</th><th class="num">Booking</th><th class="num">Pendapatan</th><th></th></tr></thead>
+            <tbody id="pkgTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== CUSTOMERS PAGE ===================== -->
+      <div class="page" id="page-customers">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Pelanggan<span class="count" id="custCountLabel"></span></h2>
+          </div>
+          <div class="subbar">
+            <div class="search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="custSearch" placeholder="Cari nama pelanggan…">
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Pelanggan</th><th class="num">Jumlah Booking</th><th class="num">Total Belanja</th><th>Booking Terakhir</th></tr></thead>
+            <tbody id="custTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== PLACEHOLDER PAGES ===================== -->
+      <div class="page" id="page-reports">
+        <section class="report-stats">
+          <div class="stat">
+            <div class="stat-label">Pendapatan Bulan Ini</div>
+            <div class="stat-value" id="repRevenue">Rp0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="repRevenueNote">—</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Booking Bulan Ini</div>
+            <div class="stat-value" id="repBookings">0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="repBookingsNote">—</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Rata-rata / Booking</div>
+            <div class="stat-value" id="repAvg">Rp0</div>
+            <div class="stat-foot"><span class="stat-delta flat" id="repAvgNote">—</span></div>
+          </div>
+        </section>
+
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-head">
+            <h2>Tren Pendapatan Harian</h2>
+            <span class="hint">14 hari terakhir · arahkan kursor ke batang untuk detail</span>
+          </div>
+          <div class="chart-wrap">
+            <svg id="reportChartSvg" viewBox="0 0 700 180" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Performa per Paket</h2></div>
+          <table>
+            <thead><tr><th>Paket</th><th>Kategori</th><th class="num">Booking</th><th class="num">Pendapatan</th><th class="num">Rata-rata</th></tr></thead>
+            <tbody id="repPkgBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page" id="page-activity">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Riwayat Aktivitas<span class="count" id="activityCountLabel"></span></h2>
+            <div class="tabs" id="activityTabs">
+              <div class="tab active" data-filter="all">Semua</div>
+              <div class="tab" data-filter="booking">Booking</div>
+              <div class="tab" data-filter="package">Paket</div>
+              <div class="tab" data-filter="system">Sistem</div>
+            </div>
+          </div>
+          <div id="activityList"></div>
+        </div>
+      </div>
+      <div class="page" id="page-settings">
+        <div class="panel"><div class="placeholder-panel">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9"/></svg>
+          <h3>Pengaturan akun segera hadir</h3>
+          <p>Untuk saat ini kamu bisa mengembalikan data ke contoh awal jika ingin memulai ulang demo ini.</p>
+          <button class="btn-ghost" onclick="resetDemoData()">Reset ke Data Contoh</button>
+        </div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== BOOKING MODAL ===================== -->
+<div class="modal-overlay" id="bookingModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="bookingModalTitle">Booking Baru</h3>
+      <button class="modal-close" id="bookingModalCloseBtn" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="bookingForm">
+      <input type="hidden" id="fBookingId">
+      <div class="form-group">
+        <label for="fCustomer">Nama Pelanggan</label>
+        <input required id="fCustomer" type="text" placeholder="cth. Budi Santoso">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fPackage">Paket Wisata</label>
+          <select required id="fPackage"></select>
+        </div>
+        <div class="form-group">
+          <label for="fPeserta">Jumlah Peserta</label>
+          <input required id="fPeserta" type="number" min="1" value="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fDate">Tanggal Booking</label>
+          <input required id="fDate" type="datetime-local">
+        </div>
+        <div class="form-group">
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option value="Lunas">Lunas</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="total-preview">
+        <span>Total tagihan</span>
+        <strong id="fTotalPreview">Rp0</strong>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="bookingCancelBtn">Batal</button>
+        <button type="submit" class="btn-solid">Simpan Booking</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== PACKAGE MODAL ===================== -->
+<div class="modal-overlay" id="packageModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="packageModalTitle">Tambah Paket</h3>
+      <button class="modal-close" id="packageModalCloseBtn" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="packageForm">
+      <input type="hidden" id="fPkgId">
+      <div class="form-group">
+        <label for="fPkgName">Nama Paket</label>
+        <input required id="fPkgName" type="text" placeholder="cth. Paket Kuliner Keluarga">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fPkgCategory">Kategori</label>
+          <input id="fPkgCategory" type="text" placeholder="cth. Kuliner">
+        </div>
+        <div class="form-group">
+          <label for="fPkgPrice">Harga / Peserta (Rp)</label>
+          <input required id="fPkgPrice" type="number" min="0" step="1000" placeholder="75000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fPkgDesc">Deskripsi</label>
+        <textarea id="fPkgDesc" placeholder="Deskripsi singkat paket wisata ini…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="packageCancelBtn">Batal</button>
+        <button type="submit" class="btn-solid">Simpan Paket</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+let state = {
+  bookings: [],
+  packages: [],
+  activity: [],
+  currentPage: 'dashboard',
+  bookingFilter: 'all',
+  bookingSearch: '',
+  bookingPage: 1,
+  customerSearch: '',
+  activityFilter: 'all'
+};
+const PAGE_SIZE = 6;
+const STORAGE_AVAILABLE = typeof window.storage !== 'undefined';
+
+const pageConfig = {
+  dashboard: {title:'Dashboard', sub:'Ringkasan operasional booking dan pendapatan.', crumb:'Dashboard'},
+  booking:   {title:'Booking', sub:'Kelola seluruh transaksi booking pelanggan.', crumb:'Booking'},
+  packages:  {title:'Paket Wisata', sub:'Kelola daftar paket wisata yang tersedia.', crumb:'Paket Wisata'},
+  customers: {title:'Pelanggan', sub:'Ringkasan pelanggan berdasarkan riwayat booking.', crumb:'Pelanggan'},
+  reports:   {title:'Laporan', sub:'Laporan mendalam untuk performa bisnis.', crumb:'Laporan'},
+  activity:  {title:'Riwayat Aktivitas', sub:'Log aktivitas sistem dan pengguna.', crumb:'Riwayat Aktivitas'},
+  settings:  {title:'Pengaturan', sub:'Pengaturan akun dan data aplikasi.', crumb:'Pengaturan'}
+};
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function formatRupiah(n){ return 'Rp' + Math.round(n||0).toLocaleString('id-ID'); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function formatDate(iso){
+  const d = new Date(iso);
+  return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function toLocalInputValue(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function getPackage(id){ return state.packages.find(p => p.id === id) || null; }
+function getPackageName(id){ const p = getPackage(id); return p ? p.name : 'Paket tidak tersedia'; }
+function generateBookingCode(d){
+  const datePart = `${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}`;
+  const rand = Array.from({length:6}, () => '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join('');
+  const code = `BK-${datePart}-${rand}`;
+  return state.bookings.some(b => b.id === code) ? generateBookingCode(d) : code;
+}
+
+/* ============================================================
+   STORAGE
+============================================================ */
+async function safeGet(key){
+  if(!STORAGE_AVAILABLE) return null;
+  try{ const r = await window.storage.get(key, false); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function safeSet(key, val){
+  if(!STORAGE_AVAILABLE) return false;
+  try{ const r = await window.storage.set(key, val, false); return !!r; }
+  catch(e){ return false; }
+}
+async function persistAll(){
+  const okB = await safeSet('gi_bookings', JSON.stringify(state.bookings));
+  const okP = await safeSet('gi_packages', JSON.stringify(state.packages));
+  const okA = await safeSet('gi_activity', JSON.stringify(state.activity));
+  if(STORAGE_AVAILABLE && !(okB && okP && okA)){
+    showToast('Gagal menyimpan perubahan. Coba lagi.', 'error');
+  }
+}
+function logActivity(type, message){
+  state.activity.unshift({
+    id: 'ACT-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    type, message,
+    date: new Date().toISOString()
+  });
+  if(state.activity.length > 200) state.activity = state.activity.slice(0,200);
+}
+function timeAgo(iso){
+  const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if(sec < 60) return 'baru saja';
+  const min = Math.floor(sec/60);
+  if(min < 60) return `${min} menit lalu`;
+  const hr = Math.floor(min/60);
+  if(hr < 24) return `${hr} jam lalu`;
+  const day = Math.floor(hr/24);
+  if(day < 7) return `${day} hari lalu`;
+  return formatDate(iso);
+}
+function getMonthRevenue(offsetMonths){
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + offsetMonths, 1);
+  const prefix = `${target.getFullYear()}-${pad2(target.getMonth()+1)}`;
+  const inMonth = state.bookings.filter(b => b.date.slice(0,7) === prefix);
+  const lunas = inMonth.filter(b => b.status === 'Lunas');
+  return {revenue: lunas.reduce((s,b) => s + b.total, 0), count: inMonth.length, lunasCount: lunas.length};
+}
+function seedData(){
+  const packages = [
+    {id:'PKT-001', name:'Paket Kuliner Keluarga', category:'Kuliner', price:75000, desc:'Wisata kuliner khas Sunda untuk keluarga, termasuk makan siang dan pemandu.'},
+    {id:'PKT-002', name:'Paket Kebun & Edukasi', category:'Edukasi', price:50000, desc:'Kunjungan kebun, edukasi tanaman, dan workshop berkebun untuk anak-anak.'},
+    {id:'PKT-003', name:'Paket Gathering Kantor', category:'Korporat', price:120000, desc:'Paket gathering untuk instansi atau perusahaan dengan aktivitas outbound ringan.'}
+  ];
+  const bookings = [
+    {id:'BK-20260810-0E07F6', customer:'Tiooo', packageId:'PKT-001', peserta:1, total:75000, status:'Lunas', date:'2026-08-10T01:01:00'},
+    {id:'BK-20260808-A2777E', customer:'Ssshab', packageId:'PKT-001', peserta:18, total:1350000, status:'Lunas', date:'2026-08-08T09:54:00'}
+  ];
+  return {bookings, packages};
+}
+function loadSeed(){ const s = seedData(); state.bookings = s.bookings; state.packages = s.packages; }
+
+async function init(){
+  const bRaw = await safeGet('gi_bookings');
+  const pRaw = await safeGet('gi_packages');
+  const aRaw = await safeGet('gi_activity');
+  let ok = false;
+  if(bRaw && pRaw){
+    try{ state.bookings = JSON.parse(bRaw); state.packages = JSON.parse(pRaw); ok = true; }
+    catch(e){ ok = false; }
+  }
+  if(aRaw){ try{ state.activity = JSON.parse(aRaw) || []; } catch(e){ state.activity = []; } }
+  if(!ok){
+    loadSeed();
+    logActivity('system-init', 'Sistem diinisialisasi dengan data contoh.');
+    await persistAll();
+  }
+  if(!STORAGE_AVAILABLE){ showToast('Mode sementara: perubahan tidak tersimpan setelah refresh.', 'error'); }
+  bindEvents();
+  navigate('dashboard');
+  renderAll();
+}
+
+async function resetDemoData(){
+  if(!confirm('Reset semua data ke contoh awal? Perubahan yang sudah dibuat akan hilang.')) return;
+  loadSeed();
+  state.activity = [];
+  logActivity('system-reset', 'Data direset ke contoh awal oleh Administrator.');
+  await persistAll();
+  state.bookingFilter = 'all'; state.bookingSearch = ''; state.bookingPage = 1; state.customerSearch = ''; state.activityFilter = 'all';
+  document.getElementById('bookingPageSearch').value = '';
+  document.getElementById('custSearch').value = '';
+  document.getElementById('globalSearch').value = '';
+  renderAll();
+  showToast('Data berhasil direset ke contoh awal.', 'success');
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function navigate(page){
+  state.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+  const cfg = pageConfig[page];
+  document.getElementById('pageTitle').textContent = cfg.title;
+  document.getElementById('pageSub').textContent = cfg.sub;
+  document.getElementById('crumbCurrent').textContent = cfg.crumb;
+  document.getElementById('liveChip').style.display = (page === 'dashboard') ? 'flex' : 'none';
+  updateHeaderActions(page);
+  document.querySelector('.content').scrollTo?.({top:0});
+  window.scrollTo({top:0, behavior:'auto'});
+}
+
+const ICON_EXPORT = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg><span>Ekspor</span>`;
+const ICON_EXPORT_REPORT = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg><span>Ekspor Laporan</span>`;
+const ICON_CLEAR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg><span>Hapus Riwayat</span>`;
+const ICON_ACT_BOOKING = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="1.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>`;
+const ICON_ACT_PACKAGE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>`;
+const ICON_ACT_SYSTEM = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`;
+
+function updateHeaderActions(page){
+  const btnPrimary = document.getElementById('btnPrimary');
+  const btnPrimaryLabel = document.getElementById('btnPrimaryLabel');
+  const btnExport = document.getElementById('btnExport');
+  btnPrimary.style.display = 'flex';
+  btnExport.style.display = 'flex';
+  switch(page){
+    case 'dashboard':
+    case 'booking':
+      btnPrimaryLabel.textContent = 'Booking Baru';
+      btnPrimary.onclick = () => openBookingModal();
+      btnExport.innerHTML = ICON_EXPORT;
+      btnExport.onclick = () => exportCSV('bookings');
+      break;
+    case 'packages':
+      btnPrimaryLabel.textContent = 'Tambah Paket';
+      btnPrimary.onclick = () => openPackageModal();
+      btnExport.innerHTML = ICON_EXPORT;
+      btnExport.onclick = () => exportCSV('packages');
+      break;
+    case 'customers':
+      btnPrimary.style.display = 'none';
+      btnExport.innerHTML = ICON_EXPORT;
+      btnExport.onclick = () => exportCSV('customers');
+      break;
+    case 'reports':
+      btnPrimary.style.display = 'none';
+      btnExport.innerHTML = ICON_EXPORT_REPORT;
+      btnExport.onclick = () => exportCSV('report');
+      break;
+    case 'activity':
+      btnPrimary.style.display = 'none';
+      btnExport.innerHTML = ICON_CLEAR;
+      btnExport.onclick = () => clearActivityLog();
+      break;
+    default:
+      btnPrimary.style.display = 'none';
+      btnExport.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   DATA QUERIES
+============================================================ */
+function getFilteredBookings(){
+  let arr = [...state.bookings];
+  if(state.bookingFilter === 'lunas') arr = arr.filter(b => b.status === 'Lunas');
+  else if(state.bookingFilter === 'pending') arr = arr.filter(b => b.status === 'Pending');
+  if(state.bookingSearch){
+    const q = state.bookingSearch;
+    arr = arr.filter(b =>
+      b.id.toLowerCase().includes(q) ||
+      b.customer.toLowerCase().includes(q) ||
+      getPackageName(b.packageId).toLowerCase().includes(q)
+    );
+  }
+  arr.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return arr;
+}
+function getPackageStats(){
+  return state.packages.map(p => {
+    const rel = state.bookings.filter(b => b.packageId === p.id);
+    const revenue = rel.filter(b => b.status === 'Lunas').reduce((s,b) => s + b.total, 0);
+    return {...p, count: rel.length, revenue};
+  }).sort((a,b) => b.revenue - a.revenue);
+}
+function getCustomerAggregates(){
+  const map = {};
+  state.bookings.forEach(b => {
+    const key = b.customer.trim().toLowerCase();
+    if(!map[key]) map[key] = {name:b.customer.trim(), count:0, total:0, lastDate:b.date};
+    map[key].count++;
+    if(b.status === 'Lunas') map[key].total += b.total;
+    if(new Date(b.date) > new Date(map[key].lastDate)) map[key].lastDate = b.date;
+  });
+  let arr = Object.values(map);
+  if(state.customerSearch) arr = arr.filter(c => c.name.toLowerCase().includes(state.customerSearch));
+  arr.sort((a,b) => b.total - a.total);
+  return arr;
+}
+
+/* ============================================================
+   ROW TEMPLATES
+============================================================ */
+function emptyRow(colspan, msg){
+  return `<tr><td colspan="${colspan}" style="text-align:center;padding:36px 18px;color:var(--ink-45);">${msg || 'Tidak ada data yang cocok.'}</td></tr>`;
+}
+function bookingRowHTML(b){
+  const pkgName = getPackageName(b.packageId);
+  const initials = escapeHtml((b.customer.trim().charAt(0) || '?').toUpperCase());
+  const statusClass = b.status === 'Lunas' ? 'lunas' : 'pending';
+  return `<tr>
+    <td class="code">${b.id}</td>
+    <td><div class="cust"><div class="cust-avatar">${initials}</div><span class="cust-name">${escapeHtml(b.customer)}</span></div></td>
+    <td>${escapeHtml(pkgName)} <span style="color:var(--ink-45);font-size:11px;">· ${b.peserta} org</span></td>
+    <td class="num">${formatRupiah(b.total)}</td>
+    <td><span class="status ${statusClass}"><span class="status-dot"></span>${b.status}</span></td>
+    <td class="date-txt">${formatDate(b.date)}</td>
+    <td>
+      <div style="display:flex; gap:4px; justify-content:flex-end;">
+        <button class="row-action" title="Edit booking" onclick="editBooking('${b.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="row-action danger" title="Hapus booking" onclick="deleteBooking('${b.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+        </button>
+      </div>
+    </td>
+  </tr>`;
+}
+function packageRowHTML(p){
+  const rel = state.bookings.filter(b => b.packageId === p.id);
+  const revenue = rel.filter(b => b.status === 'Lunas').reduce((s,b) => s + b.total, 0);
+  return `<tr>
+    <td>
+      <strong>${escapeHtml(p.name)}</strong>
+      <div style="color:var(--ink-45);font-size:11px;margin-top:2px;max-width:280px;">${escapeHtml(p.desc || '')}</div>
+    </td>
+    <td>${escapeHtml(p.category || '—')}</td>
+    <td class="num">${formatRupiah(p.price)}</td>
+    <td class="num">${rel.length}</td>
+    <td class="num">${formatRupiah(revenue)}</td>
+    <td>
+      <div style="display:flex; gap:4px; justify-content:flex-end;">
+        <button class="row-action" title="Edit paket" onclick="editPackage('${p.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="row-action danger" title="Hapus paket" onclick="deletePackage('${p.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+        </button>
+      </div>
+    </td>
+  </tr>`;
+}
+function customerRowHTML(c){
+  const initials = escapeHtml((c.name.trim().charAt(0) || '?').toUpperCase());
+  return `<tr>
+    <td><div class="cust"><div class="cust-avatar">${initials}</div><span class="cust-name">${escapeHtml(c.name)}</span></div></td>
+    <td class="num">${c.count}</td>
+    <td class="num">${formatRupiah(c.total)}</td>
+    <td class="date-txt">${formatDate(c.lastDate)}</td>
+  </tr>`;
+}
+
+/* ============================================================
+   RENDER: DASHBOARD
+============================================================ */
+function renderDashboard(){
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const monthPrefix = today.toISOString().slice(0,7);
+
+  const todays = state.bookings.filter(b => b.date.slice(0,10) === todayStr);
+  const monthBookings = state.bookings.filter(b => b.date.slice(0,7) === monthPrefix);
+  const lunasMonth = monthBookings.filter(b => b.status === 'Lunas');
+  const totalPendapatan = lunasMonth.reduce((s,b) => s + b.total, 0);
+  const pendingAll = state.bookings.filter(b => b.status === 'Pending');
+
+  document.getElementById('statToday').textContent = todays.length;
+  document.getElementById('statTodayNote').textContent = todays.length
+    ? `booking terbaru ${formatDate(todays.sort((a,b)=>new Date(b.date)-new Date(a.date))[0].date).split(' ')[1]}`
+    : 'belum ada booking hari ini';
+
+  document.getElementById('statMonth').textContent = monthBookings.length;
+  const monthNote = document.getElementById('statMonthNote');
+  if(monthBookings.length){
+    const pct = Math.round((lunasMonth.length / monthBookings.length) * 100);
+    monthNote.textContent = `${pct}% lunas`;
+    monthNote.className = 'stat-delta ' + (pct === 100 ? 'pos' : (pct === 0 ? 'warn' : 'flat'));
+  } else {
+    monthNote.textContent = 'belum ada booking bulan ini';
+    monthNote.className = 'stat-delta flat';
+  }
+
+  document.getElementById('statRevenue').textContent = formatRupiah(totalPendapatan);
+  document.getElementById('statRevenueNote').textContent = `${lunasMonth.length} transaksi lunas bulan ini`;
+
+  document.getElementById('statPending').textContent = pendingAll.length;
+  const pendingNote = document.getElementById('statPendingNote');
+  pendingNote.textContent = pendingAll.length ? `${pendingAll.length} menunggu konfirmasi` : 'tidak ada tunggakan';
+  pendingNote.className = 'stat-delta ' + (pendingAll.length ? 'warn' : 'flat');
+
+  updateSparkline();
+
+  const recent = [...state.bookings].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
+  document.getElementById('recentCountLabel').textContent = `(${state.bookings.length})`;
+  document.getElementById('recentBookingsBody').innerHTML = recent.length
+    ? recent.map(bookingRowHTML).join('')
+    : emptyRow(7, 'Belum ada booking. Klik "Booking Baru" untuk menambahkan.');
+
+  const stats = getPackageStats();
+  const totalRev = stats.reduce((s,p) => s + p.revenue, 0);
+  const list = document.getElementById('pkgPopularityList');
+  if(!stats.length){
+    list.innerHTML = `<div class="note"><span>Belum ada paket wisata. Tambahkan paket pertama di menu Paket Wisata.</span></div>`;
+  } else if(totalRev === 0){
+    list.innerHTML = stats.slice(0,3).map(p => `
+      <div class="pkg-row">
+        <div class="pkg-top"><span class="pkg-name">${escapeHtml(p.name)}</span><span class="pkg-rev">Rp0</span></div>
+        <div class="pkg-meta">${p.count} booking · belum ada pendapatan lunas</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      </div>`).join('') + `<div class="note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span>Belum ada booking berstatus lunas bulan ini.</span></div>`;
+  } else {
+    const top3 = stats.slice(0,3);
+    list.innerHTML = top3.map(p => `
+      <div class="pkg-row">
+        <div class="pkg-top"><span class="pkg-name">${escapeHtml(p.name)}</span><span class="pkg-rev">${formatRupiah(p.revenue)}</span></div>
+        <div class="pkg-meta">${p.count} booking · ${Math.round((p.revenue/totalRev)*100)}% dari pendapatan</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round((p.revenue/totalRev)*100)}%"></div></div>
+      </div>`).join('') + (top3.length === 1 ? `<div class="note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span>Seluruh pendapatan berasal dari satu paket — pertimbangkan mempromosikan paket lain.</span></div>` : '');
+  }
+}
+
+function updateSparkline(){
+  const today = new Date();
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const values = days.map(ds => state.bookings
+    .filter(b => b.date.slice(0,10) === ds && b.status === 'Lunas')
+    .reduce((s,b) => s + b.total, 0));
+  const max = Math.max(...values, 1);
+  const w = 64, h = 22, n = values.length;
+  const stepX = w / (n - 1);
+  const pts = values.map((v,i) => [i * stepX, h - 2 - (v / max) * (h - 4)]);
+  const path = pts.map((p,i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  document.getElementById('sparkPath').setAttribute('d', path);
+  const last = pts[pts.length - 1];
+  document.getElementById('sparkDot').setAttribute('cx', last[0].toFixed(1));
+  document.getElementById('sparkDot').setAttribute('cy', last[1].toFixed(1));
+}
+
+/* ============================================================
+   RENDER: BOOKING PAGE
+============================================================ */
+function renderBookingPage(){
+  const filtered = getFilteredBookings();
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if(state.bookingPage > totalPages) state.bookingPage = totalPages;
+  const start = (state.bookingPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('bookingCountLabel').textContent = `(${total})`;
+  document.getElementById('bookingTableFullBody').innerHTML = pageItems.length
+    ? pageItems.map(bookingRowHTML).join('')
+    : emptyRow(7, 'Tidak ada booking yang cocok dengan pencarian/filter.');
+  document.getElementById('bookingPagerInfo').textContent = total
+    ? `Menampilkan ${start+1}–${Math.min(start+PAGE_SIZE, total)} dari ${total}`
+    : 'Tidak ada data';
+
+  const pager = document.getElementById('bookingPager');
+  let html = `<button ${state.bookingPage<=1?'disabled':''} onclick="gotoBookingPage(${state.bookingPage-1})" aria-label="Sebelumnya">‹</button>`;
+  for(let i=1;i<=totalPages;i++){
+    html += `<button class="${i===state.bookingPage?'active':''}" onclick="gotoBookingPage(${i})">${i}</button>`;
+  }
+  html += `<button ${state.bookingPage>=totalPages?'disabled':''} onclick="gotoBookingPage(${state.bookingPage+1})" aria-label="Berikutnya">›</button>`;
+  pager.innerHTML = html;
+}
+function gotoBookingPage(n){ state.bookingPage = n; renderBookingPage(); }
+
+/* ============================================================
+   RENDER: PACKAGES PAGE
+============================================================ */
+function renderPackagesPage(){
+  document.getElementById('pkgCountLabel').textContent = `(${state.packages.length})`;
+  document.getElementById('pkgTableBody').innerHTML = state.packages.length
+    ? state.packages.map(packageRowHTML).join('')
+    : emptyRow(6, 'Belum ada paket wisata. Klik "Tambah Paket" untuk membuat yang pertama.');
+}
+
+/* ============================================================
+   RENDER: CUSTOMERS PAGE
+============================================================ */
+function renderCustomersPage(){
+  const list = getCustomerAggregates();
+  document.getElementById('custCountLabel').textContent = `(${list.length})`;
+  document.getElementById('custTableBody').innerHTML = list.length
+    ? list.map(customerRowHTML).join('')
+    : emptyRow(4, 'Tidak ada pelanggan yang cocok.');
+}
+
+/* ============================================================
+   RENDER: REPORTS PAGE
+============================================================ */
+function renderReportsPage(){
+  const thisM = getMonthRevenue(0), lastM = getMonthRevenue(-1);
+  const revChange = lastM.revenue > 0 ? Math.round((thisM.revenue - lastM.revenue) / lastM.revenue * 100) : (thisM.revenue > 0 ? 100 : 0);
+  const cntChange = lastM.count > 0 ? Math.round((thisM.count - lastM.count) / lastM.count * 100) : (thisM.count > 0 ? 100 : 0);
+  const avgBooking = thisM.lunasCount ? Math.round(thisM.revenue / thisM.lunasCount) : 0;
+
+  document.getElementById('repRevenue').textContent = formatRupiah(thisM.revenue);
+  const revNote = document.getElementById('repRevenueNote');
+  revNote.textContent = (thisM.revenue || lastM.revenue) ? `${revChange >= 0 ? '+' : ''}${revChange}% dari bulan lalu` : 'belum ada data';
+  revNote.className = 'stat-delta ' + (revChange > 0 ? 'pos' : (revChange < 0 ? 'warn' : 'flat'));
+
+  document.getElementById('repBookings').textContent = thisM.count;
+  const cntNote = document.getElementById('repBookingsNote');
+  cntNote.textContent = (thisM.count || lastM.count) ? `${cntChange >= 0 ? '+' : ''}${cntChange}% dari bulan lalu` : 'belum ada data';
+  cntNote.className = 'stat-delta ' + (cntChange > 0 ? 'pos' : (cntChange < 0 ? 'warn' : 'flat'));
+
+  document.getElementById('repAvg').textContent = formatRupiah(avgBooking);
+  document.getElementById('repAvgNote').textContent = thisM.lunasCount ? `dari ${thisM.lunasCount} booking lunas` : 'belum ada booking lunas bulan ini';
+
+  renderReportChart();
+
+  const stats = getPackageStats();
+  document.getElementById('repPkgBody').innerHTML = stats.length
+    ? stats.map(p => `<tr>
+        <td><strong>${escapeHtml(p.name)}</strong></td>
+        <td>${escapeHtml(p.category || '—')}</td>
+        <td class="num">${p.count}</td>
+        <td class="num">${formatRupiah(p.revenue)}</td>
+        <td class="num">${formatRupiah(p.count ? p.revenue / p.count : 0)}</td>
+      </tr>`).join('')
+    : emptyRow(5, 'Belum ada data paket untuk ditampilkan.');
+}
+function renderReportChart(){
+  const today = new Date();
+  const days = [];
+  for(let i = 13; i >= 0; i--){ const d = new Date(today); d.setDate(d.getDate() - i); days.push(d); }
+  const values = days.map(d => {
+    const ds = d.toISOString().slice(0,10);
+    return state.bookings.filter(b => b.date.slice(0,10) === ds && b.status === 'Lunas').reduce((s,b) => s + b.total, 0);
+  });
+  const max = Math.max(...values, 1);
+  const w = 700, h = 180, gap = 6;
+  const barW = (w - (days.length - 1) * gap) / days.length;
+  let svg = '';
+  values.forEach((v,i) => {
+    const bh = Math.max(2, (v / max) * (h - 30));
+    const x = i * (barW + gap);
+    const y = h - 30 - bh;
+    const label = `${pad2(days[i].getDate())}/${pad2(days[i].getMonth()+1)}: ${formatRupiah(v)}`;
+    svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="#1F5D3E" opacity="${v>0?1:0.15}"><title>${label}</title></rect>`;
+    if(i % 2 === 0){
+      svg += `<text x="${(x+barW/2).toFixed(1)}" y="${h-10}" font-size="9" fill="#8A9285" text-anchor="middle" font-family="IBM Plex Mono, monospace">${pad2(days[i].getDate())}/${pad2(days[i].getMonth()+1)}</text>`;
+    }
+  });
+  document.getElementById('reportChartSvg').innerHTML = svg;
+}
+
+/* ============================================================
+   RENDER: ACTIVITY PAGE
+============================================================ */
+function renderActivityPage(){
+  let list = [...state.activity];
+  if(state.activityFilter !== 'all') list = list.filter(a => a.type.startsWith(state.activityFilter));
+  document.getElementById('activityCountLabel').textContent = `(${list.length})`;
+  const container = document.getElementById('activityList');
+  if(!list.length){
+    container.innerHTML = `<div class="note" style="margin:16px 18px;"><span>Belum ada aktivitas tercatat untuk filter ini.</span></div>`;
+    return;
+  }
+  container.innerHTML = list.map(a => {
+    const group = a.type.startsWith('booking') ? 'booking' : (a.type.startsWith('package') ? 'package' : 'system');
+    const icon = group === 'booking' ? ICON_ACT_BOOKING : (group === 'package' ? ICON_ACT_PACKAGE : ICON_ACT_SYSTEM);
+    return `<div class="activity-item">
+      <div class="activity-icon act-${group}">${icon}</div>
+      <div class="activity-body">
+        <div class="activity-msg">${escapeHtml(a.message)}</div>
+        <div class="activity-meta">${timeAgo(a.date)} · ${formatDate(a.date)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function clearActivityLog(){
+  if(!confirm('Hapus seluruh riwayat aktivitas? Tindakan ini tidak dapat dibatalkan.')) return;
+  state.activity = [];
+  await persistAll();
+  renderActivityPage();
+  showToast('Riwayat aktivitas berhasil dihapus.', 'success');
+}
+
+/* ============================================================
+   RENDER: NAV COUNTS + ALL
+============================================================ */
+function renderAll(){
+  document.getElementById('navBookingCount').textContent = pad2(state.bookings.length);
+  renderDashboard();
+  renderBookingPage();
+  renderPackagesPage();
+  renderCustomersPage();
+  renderReportsPage();
+  renderActivityPage();
+}
+
+/* ============================================================
+   BOOKING MODAL
+============================================================ */
+function populatePackageSelect(){
+  const sel = document.getElementById('fPackage');
+  if(!state.packages.length){
+    sel.innerHTML = `<option value="" disabled selected>Belum ada paket — tambahkan di menu Paket Wisata</option>`;
+    return;
+  }
+  sel.innerHTML = state.packages.map(p => `<option value="${p.id}">${escapeHtml(p.name)} — ${formatRupiah(p.price)}/peserta</option>`).join('');
+}
+function updateTotalPreview(){
+  const pkg = getPackage(document.getElementById('fPackage').value);
+  const peserta = parseInt(document.getElementById('fPeserta').value) || 0;
+  const total = pkg ? pkg.price * peserta : 0;
+  document.getElementById('fTotalPreview').textContent = formatRupiah(total);
+}
+function openBookingModal(id){
+  const form = document.getElementById('bookingForm');
+  form.reset();
+  populatePackageSelect();
+  if(id){
+    const b = state.bookings.find(x => x.id === id);
+    document.getElementById('bookingModalTitle').textContent = 'Edit Booking';
+    document.getElementById('fBookingId').value = b.id;
+    document.getElementById('fCustomer').value = b.customer;
+    document.getElementById('fPackage').value = b.packageId;
+    document.getElementById('fPeserta').value = b.peserta;
+    document.getElementById('fDate').value = toLocalInputValue(b.date);
+    document.getElementById('fStatus').value = b.status;
+  } else {
+    document.getElementById('bookingModalTitle').textContent = 'Booking Baru';
+    document.getElementById('fBookingId').value = '';
+    document.getElementById('fPeserta').value = 1;
+    document.getElementById('fDate').value = toLocalInputValue(new Date().toISOString());
+    document.getElementById('fStatus').value = 'Lunas';
+    if(state.packages.length) document.getElementById('fPackage').value = state.packages[0].id;
+  }
+  updateTotalPreview();
+  showModal('bookingModalOverlay');
+}
+function editBooking(id){ openBookingModal(id); }
+async function deleteBooking(id){
+  const b = state.bookings.find(x => x.id === id);
+  if(!b) return;
+  if(!confirm(`Hapus booking ${id} atas nama ${b.customer}? Tindakan ini tidak dapat dibatalkan.`)) return;
+  state.bookings = state.bookings.filter(x => x.id !== id);
+  logActivity('booking-delete', `Booking ${id} (${b.customer}) dihapus.`);
+  await persistAll();
+  renderAll();
+  showToast('Booking berhasil dihapus.', 'success');
+}
+async function handleBookingSubmit(e){
+  e.preventDefault();
+  const id = document.getElementById('fBookingId').value;
+  const customer = document.getElementById('fCustomer').value.trim();
+  const packageId = document.getElementById('fPackage').value;
+  const peserta = Math.max(1, parseInt(document.getElementById('fPeserta').value) || 1);
+  const status = document.getElementById('fStatus').value;
+  const dateVal = document.getElementById('fDate').value;
+  if(!customer){ showToast('Nama pelanggan wajib diisi.', 'error'); return; }
+  if(!packageId){ showToast('Pilih paket wisata terlebih dahulu.', 'error'); return; }
+  if(!dateVal){ showToast('Tanggal booking wajib diisi.', 'error'); return; }
+  const pkg = getPackage(packageId);
+  const total = pkg ? pkg.price * peserta : 0;
+  const isoDate = new Date(dateVal).toISOString();
+
+  if(id){
+    const b = state.bookings.find(x => x.id === id);
+    Object.assign(b, {customer, packageId, peserta, status, total, date: isoDate});
+    logActivity('booking-update', `Booking ${id} (${customer}) diperbarui.`);
+    showToast('Booking berhasil diperbarui.', 'success');
+  } else {
+    const newId = generateBookingCode(new Date(dateVal));
+    state.bookings.push({id: newId, customer, packageId, peserta, status, total, date: isoDate});
+    logActivity('booking-create', `Booking baru ${newId} untuk ${customer} ditambahkan.`);
+    showToast('Booking baru berhasil ditambahkan.', 'success');
+  }
+  await persistAll();
+  closeModal('bookingModalOverlay');
+  renderAll();
+}
+
+/* ============================================================
+   PACKAGE MODAL
+============================================================ */
+function openPackageModal(id){
+  const form = document.getElementById('packageForm');
+  form.reset();
+  if(id){
+    const p = state.packages.find(x => x.id === id);
+    document.getElementById('packageModalTitle').textContent = 'Edit Paket';
+    document.getElementById('fPkgId').value = p.id;
+    document.getElementById('fPkgName').value = p.name;
+    document.getElementById('fPkgCategory').value = p.category || '';
+    document.getElementById('fPkgPrice').value = p.price;
+    document.getElementById('fPkgDesc').value = p.desc || '';
+  } else {
+    document.getElementById('packageModalTitle').textContent = 'Tambah Paket';
+    document.getElementById('fPkgId').value = '';
+  }
+  showModal('packageModalOverlay');
+}
+function editPackage(id){ openPackageModal(id); }
+async function deletePackage(id){
+  const p = state.packages.find(x => x.id === id);
+  if(!p) return;
+  const used = state.bookings.filter(b => b.packageId === id).length;
+  const msg = used > 0
+    ? `Paket "${p.name}" masih digunakan pada ${used} booking. Booking terkait akan tetap ada namun paket ini tidak lagi bisa dipilih. Lanjutkan hapus?`
+    : `Hapus paket "${p.name}"?`;
+  if(!confirm(msg)) return;
+  state.packages = state.packages.filter(x => x.id !== id);
+  logActivity('package-delete', `Paket "${p.name}" dihapus.`);
+  await persistAll();
+  renderAll();
+  showToast('Paket berhasil dihapus.', 'success');
+}
+async function handlePackageSubmit(e){
+  e.preventDefault();
+  const id = document.getElementById('fPkgId').value;
+  const name = document.getElementById('fPkgName').value.trim();
+  const category = document.getElementById('fPkgCategory').value.trim();
+  const price = Math.max(0, parseInt(document.getElementById('fPkgPrice').value) || 0);
+  const desc = document.getElementById('fPkgDesc').value.trim();
+  if(!name){ showToast('Nama paket wajib diisi.', 'error'); return; }
+  if(price <= 0){ showToast('Harga per peserta harus lebih dari 0.', 'error'); return; }
+
+  if(id){
+    const p = state.packages.find(x => x.id === id);
+    Object.assign(p, {name, category, price, desc});
+    // keep totals in sync for existing bookings on this package
+    state.bookings.forEach(b => { if(b.packageId === id) b.total = price * b.peserta; });
+    logActivity('package-update', `Paket "${name}" diperbarui.`);
+    showToast('Paket berhasil diperbarui.', 'success');
+  } else {
+    const newId = 'PKT-' + Date.now().toString(36).toUpperCase();
+    state.packages.push({id: newId, name, category, price, desc});
+    logActivity('package-create', `Paket baru "${name}" ditambahkan.`);
+    showToast('Paket baru berhasil ditambahkan.', 'success');
+  }
+  await persistAll();
+  closeModal('packageModalOverlay');
+  renderAll();
+}
+
+/* ============================================================
+   MODAL HELPERS
+============================================================ */
+function showModal(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+function closeAllModals(){ document.querySelectorAll('.modal-overlay.active').forEach(o => closeModal(o.id)); }
+
+/* ============================================================
+   CSV EXPORT
+============================================================ */
+function csvEscape(v){
+  v = String(v);
+  if(v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+function downloadCSV(rows, filename){
+  const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Berkas CSV berhasil diunduh.', 'success');
+}
+function exportCSV(type){
+  if(type === 'bookings'){
+    const rows = [['Kode Booking','Pelanggan','Paket','Jumlah Peserta','Total','Status','Tanggal']];
+    getFilteredBookings().forEach(b => rows.push([b.id, b.customer, getPackageName(b.packageId), b.peserta, b.total, b.status, formatDate(b.date)]));
+    downloadCSV(rows, 'booking-godong-ijo.csv');
+  } else if(type === 'packages'){
+    const rows = [['Nama Paket','Kategori','Harga per Peserta','Jumlah Booking','Pendapatan']];
+    getPackageStats().forEach(p => rows.push([p.name, p.category || '', p.price, p.count, p.revenue]));
+    downloadCSV(rows, 'paket-wisata-godong-ijo.csv');
+  } else if(type === 'customers'){
+    const rows = [['Nama Pelanggan','Jumlah Booking','Total Belanja','Booking Terakhir']];
+    getCustomerAggregates().forEach(c => rows.push([c.name, c.count, c.total, formatDate(c.lastDate)]));
+    downloadCSV(rows, 'pelanggan-godong-ijo.csv');
+  } else if(type === 'report'){
+    const thisM = getMonthRevenue(0), lastM = getMonthRevenue(-1);
+    const rows = [
+      ['Ringkasan Laporan Bulanan'],
+      ['Metrik','Bulan Ini','Bulan Lalu'],
+      ['Pendapatan', thisM.revenue, lastM.revenue],
+      ['Jumlah Booking', thisM.count, lastM.count],
+      ['Booking Lunas', thisM.lunasCount, lastM.lunasCount],
+      [],
+      ['Performa per Paket'],
+      ['Nama Paket','Kategori','Harga per Peserta','Jumlah Booking','Pendapatan']
+    ];
+    getPackageStats().forEach(p => rows.push([p.name, p.category || '', p.price, p.count, p.revenue]));
+    downloadCSV(rows, 'laporan-godong-ijo.csv');
+  }
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function showToast(msg, type){
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || 'success');
+  t.innerHTML = `<span>${escapeHtml(msg)}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0'; t.style.transform = 'translateY(6px)';
+    setTimeout(() => t.remove(), 300);
+  }, 2800);
+}
+
+/* ============================================================
+   GLOBAL SEARCH
+============================================================ */
+function globalSearchHandler(val){
+  state.bookingSearch = val.trim().toLowerCase();
+  document.getElementById('bookingPageSearch').value = val;
+  state.bookingPage = 1;
+  if(val && state.currentPage !== 'booking') navigate('booking');
+  renderBookingPage();
+}
+
+/* ============================================================
+   EVENT BINDING
+============================================================ */
+function bindEvents(){
+  document.querySelectorAll('.nav-link').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); navigate(a.dataset.page); });
+  });
+
+  document.getElementById('globalSearch').addEventListener('input', e => globalSearchHandler(e.target.value));
+
+  document.getElementById('bookingPageSearch').addEventListener('input', e => {
+    state.bookingSearch = e.target.value.trim().toLowerCase();
+    document.getElementById('globalSearch').value = e.target.value;
+    state.bookingPage = 1;
+    renderBookingPage();
+  });
+
+  document.querySelectorAll('#bookingTabs .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#bookingTabs .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.bookingFilter = tab.dataset.filter;
+      state.bookingPage = 1;
+      renderBookingPage();
+    });
+  });
+
+  document.getElementById('custSearch').addEventListener('input', e => {
+    state.customerSearch = e.target.value.trim().toLowerCase();
+    renderCustomersPage();
+  });
+
+  document.querySelectorAll('#activityTabs .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#activityTabs .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.activityFilter = tab.dataset.filter;
+      renderActivityPage();
+    });
+  });
+
+  // Booking modal
+  document.getElementById('bookingForm').addEventListener('submit', handleBookingSubmit);
+  document.getElementById('fPackage').addEventListener('change', updateTotalPreview);
+  document.getElementById('fPeserta').addEventListener('input', updateTotalPreview);
+  document.getElementById('bookingModalCloseBtn').addEventListener('click', () => closeModal('bookingModalOverlay'));
+  document.getElementById('bookingCancelBtn').addEventListener('click', () => closeModal('bookingModalOverlay'));
+  document.getElementById('bookingModalOverlay').addEventListener('click', e => { if(e.target.id === 'bookingModalOverlay') closeModal('bookingModalOverlay'); });
+
+  // Package modal
+  document.getElementById('packageForm').addEventListener('submit', handlePackageSubmit);
+  document.getElementById('packageModalCloseBtn').addEventListener('click', () => closeModal('packageModalOverlay'));
+  document.getElementById('packageCancelBtn').addEventListener('click', () => closeModal('packageModalOverlay'));
+  document.getElementById('packageModalOverlay').addEventListener('click', e => { if(e.target.id === 'packageModalOverlay') closeModal('packageModalOverlay'); });
+
+  document.addEventListener('keydown', e => {
+    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); document.getElementById('globalSearch').focus(); }
+    if(e.key === 'Escape'){ closeAllModals(); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

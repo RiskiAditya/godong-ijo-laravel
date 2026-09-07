@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTA Button Component Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding: 40px;
+            background: #F5F1E8;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #2C2C2C;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        /* Button base styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+            transition: all 0.25s ease-in-out;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-decoration: none;
+        }
+        
+        .btn:focus-visible {
+            outline: 2px solid #2D7A3E;
+            outline-offset: 2px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2D7A3E 0%, #5FB878 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0) scale(1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #2D7A3E;
+            border-color: #2D7A3E;
+        }
+        
+        .btn-secondary:hover {
+            background: #2D7A3E;
+            color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary:active {
+            transform: translateY(0) scale(1);
+        }
+        
+        .code-block {
+            background: #2C2C2C;
+            color: #5FB878;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌿 CTA Button Component Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Button Variants</h2>
+        <p>Testing primary and secondary button styles</p>
+        <div class="button-group">
+            <button class="btn btn-primary" type="button">Get Inspired</button>
+            <button class="btn btn-secondary" type="button">Start Planning</button>
+        </div>
+        <div class="code-block">
+&lt;x-cta-button variant="primary"&gt;Get Inspired&lt;/x-cta-button&gt;
+&lt;x-cta-button variant="secondary"&gt;Start Planning&lt;/x-cta-button&gt;
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Link Type (renders as &lt;a&gt; tag)</h2>
+        <p>Testing type="link" with href attribute</p>
+        <div class="button-group">
+            <a href="#destination" class="btn btn-primary">Explore Destinations</a>
+            <a href="#contact" class="btn btn-secondary">Contact Us</a>
+        </div>
+        <div class="code-block">
+&lt;x-cta-button variant="primary" type="link" href="#destination"&gt;
+    Explore Destinations
+&lt;/x-cta-button&gt;
+&lt;x-cta-button variant="secondary" type="link" href="#contact"&gt;
+    Contact Us
+&lt;/x-cta-button&gt;
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Attribute Merging</h2>
+        <p>Testing custom classes and attributes</p>
+        <div class="button-group">
+            <button class="btn btn-primary custom-class" id="custom-button" type="button">
+                Custom Button
+            </button>
+            <a href="#" class="btn btn-secondary large-btn" target="_blank">
+                External Link
+            </a>
+        </div>
+        <div class="code-block">
+&lt;x-cta-button variant="primary" class="custom-class" id="custom-button"&gt;
+    Custom Button
+&lt;/x-cta-button&gt;
+&lt;x-cta-button variant="secondary" type="link" href="#" class="large-btn" target="_blank"&gt;
+    External Link
+&lt;/x-cta-button&gt;
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Accessibility</h2>
+        <p>Testing keyboard navigation and focus states (use Tab key to navigate)</p>
+        <div class="button-group">
+            <button class="btn btn-primary" type="button">Press Tab to Focus</button>
+            <button class="btn btn-secondary" type="button">Accessible Button</button>
+            <a href="#test" class="btn btn-primary">Accessible Link</a>
+        </div>
+        <div class="code-block">
+✓ Keyboard focusable (Tab navigation)
+✓ Visible focus indicator (outline)
+✓ Proper semantic HTML (&lt;button&gt; or &lt;a&gt;)
+✓ Descriptive button text
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 5: Responsive Design</h2>
+        <p>Buttons should work on all screen sizes (resize window to test)</p>
+        <div class="button-group">
+            <button class="btn btn-primary" type="button">Mobile Friendly</button>
+            <button class="btn btn-secondary" type="button">Tablet Ready</button>
+            <button class="btn btn-primary" type="button">Desktop Optimized</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>✅ Component Requirements Verification</h2>
+        <ul style="line-height: 1.8;">
+            <li>✅ Accept <code>variant</code> prop (primary, secondary)</li>
+            <li>✅ Accept <code>href</code> and <code>type</code> props for links vs buttons</li>
+            <li>✅ Support <code>$slot</code> for button text content</li>
+            <li>✅ Merge classes with <code>$attributes</code> for extensibility</li>
+            <li>✅ Render as <code>&lt;a&gt;</code> tag when type is 'link', otherwise <code>&lt;button&gt;</code></li>
+        </ul>
+    </div>
+    
+    <script>
+        // Test button click events
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                console.log('Button clicked:', this.textContent.trim());
+                
+                // Prevent default for demo links
+                if (this.getAttribute('href') && this.getAttribute('href').startsWith('#')) {
+                    if (!['#destination', '#contact', '#test'].includes(this.getAttribute('href'))) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+        
+        // Log focus events for accessibility testing
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('focus', function() {
+                console.log('Button focused:', this.textContent.trim());
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoFormatter Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .result {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .suggestions {
+            background: white;
+            border: 1px solid #ddd;
+            max-width: 100%;
+            margin-top: 5px;
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>AutoFormatter Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Phone Number Formatting Test</h2>
+        <p>Type a phone number (e.g., 081234567890). It should format as 0812-3456-7890</p>
+        <input type="text" id="phoneInput" placeholder="Type phone number...">
+        <div class="result">
+            Formatted value: <strong id="phoneResult"></strong>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Name Formatting Test</h2>
+        <p>Type a name (e.g., john doe). Each word should be capitalized.</p>
+        <input type="text" id="nameInput" placeholder="Type name...">
+        <div class="result">
+            Formatted value: <strong id="nameResult"></strong>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Email Formatting Test</h2>
+        <p>Type an email (e.g., User@Example.COM). It should convert to lowercase.</p>
+        <input type="text" id="emailInput" placeholder="Type email...">
+        <div class="result">
+            Formatted value: <strong id="emailResult"></strong>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Email Domain Suggestions Test</h2>
+        <p>Type an email with @ and partial domain (e.g., user@gm). Suggestions should appear.</p>
+        <input type="text" id="emailSuggestInput" placeholder="Type email with @...">
+        <div class="suggestions" id="suggestions"></div>
+        <div class="result">
+            Suggested domains: <strong id="suggestResult"></strong>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Manual Format Test</h2>
+        <button onclick="testManualFormat()">Run Manual Format Tests</button>
+        <div class="result" id="manualTestResult" style="margin-top: 10px;"></div>
+    </div>
+
+    <script src="auto-formatter.js"></script>
+    <script>
+        // Initialize AutoFormatter
+        const formatter = new AutoFormatter();
+        
+        // Phone number test
+        const phoneInput = document.getElementById('phoneInput');
+        const phoneResult = document.getElementById('phoneResult');
+        formatter.attachToField(phoneInput, 'phone');
+        phoneInput.addEventListener('input', (e) => {
+            phoneResult.textContent = e.target.value;
+        });
+        
+        // Name test
+        const nameInput = document.getElementById('nameInput');
+        const nameResult = document.getElementById('nameResult');
+        formatter.attachToField(nameInput, 'name');
+        nameInput.addEventListener('input', (e) => {
+            nameResult.textContent = e.target.value;
+        });
+        
+        // Email test
+        const emailInput = document.getElementById('emailInput');
+        const emailResult = document.getElementById('emailResult');
+        formatter.attachToField(emailInput, 'email');
+        emailInput.addEventListener('input', (e) => {
+            emailResult.textContent = e.target.value;
+        });
+        
+        // Email suggestions test
+        const emailSuggestInput = document.getElementById('emailSuggestInput');
+        const suggestResult = document.getElementById('suggestResult');
+        const suggestionsDiv = document.getElementById('suggestions');
+        
+        emailSuggestInput.addEventListener('input', (e) => {
+            const suggestions = formatter.getSuggestedDomains(e.target.value);
+            suggestResult.textContent = suggestions.join(', ');
+            
+            // Display clickable suggestions
+            suggestionsDiv.innerHTML = '';
+            if (suggestions.length > 0) {
+                suggestions.forEach(domain => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    const parts = e.target.value.split('@');
+                    item.textContent = parts[0] + domain;
+                    item.onclick = () => {
+                        emailSuggestInput.value = parts[0] + domain;
+                        suggestionsDiv.innerHTML = '';
+                    };
+                    suggestionsDiv.appendChild(item);
+                });
+            }
+        });
+        
+        // Manual format test
+        function testManualFormat() {
+            const tests = [
+                { type: 'phone', input: '081234567890', expected: '0812-3456-7890' },
+                { type: 'phone', input: '0812', expected: '0812' },
+                { type: 'phone', input: '08123456', expected: '0812-3456' },
+                { type: 'name', input: 'john doe smith', expected: 'John Doe Smith' },
+                { type: 'name', input: 'MARY JANE', expected: 'Mary Jane' },
+                { type: 'email', input: 'User@Example.COM', expected: 'user@example.com' }
+            ];
+            
+            let results = '<h3>Test Results:</h3>';
+            let allPassed = true;
+            
+            tests.forEach((test, index) => {
+                const result = formatter.format(test.input, test.type);
+                const passed = result === test.expected;
+                allPassed = allPassed && passed;
+                
+                results += `<div style="margin: 10px 0; color: ${passed ? 'green' : 'red'}">
+                    Test ${index + 1} (${test.type}): ${passed ? '✓ PASSED' : '✗ FAILED'}<br>
+                    Input: "${test.input}" → Output: "${result}" (Expected: "${test.expected}")
+                </div>`;
+            });
+            
+            results += `<div style="margin-top: 20px; padding: 10px; background: ${allPassed ? '#d4edda' : '#f8d7da'}; border-radius: 4px;">
+                <strong>${allPassed ? 'All tests passed! ✓' : 'Some tests failed! ✗'}</strong>
+            </div>`;
+            
+            document.getElementById('manualTestResult').innerHTML = results;
+        }
+    </script>
+</body>
+</html>
