@@ -27,6 +27,8 @@ class BookingCreationService
         );
 
         return DB::transaction(function () use ($validated, $paket, $totalHarga) {
+            $paket = PaketWisata::whereKey($paket->id)->lockForUpdate()->firstOrFail();
+
             $jadwal = Jadwal::lockForUpdate()
                 ->where('paket_id', $paket->id)
                 ->where('tanggal', $validated['tanggal_kunjungan'])

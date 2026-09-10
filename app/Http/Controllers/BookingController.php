@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FishingBookingRequest;
-use App\Models\Jadwal;
 use App\Models\PaketWisata;
 use App\Models\Pembayaran;
 use App\Models\Pemesanan;
@@ -105,28 +104,6 @@ class BookingController extends Controller
                     'message' => "Minimal peserta untuk paket ini adalah {$minimumPax} orang.",
                     'errors' => ['jumlah_orang' => ["Minimal peserta adalah {$minimumPax} orang."]],
                 ], 422);
-            }
-
-            $jadwal = Jadwal::where('paket_id', $paket->id)
-                ->where('tanggal', $validated['tanggal_kunjungan'])
-                ->lockForUpdate()
-                ->first();
-
-            if (! $jadwal) {
-                $jadwal = Jadwal::create([
-                    'paket_id' => $paket->id,
-                    'tanggal' => $validated['tanggal_kunjungan'],
-                    'kuota_tersedia' => $paket->kuota,
-                ]);
-            }
-
-            if (! $jadwal->isAvailable($validated['jumlah_orang'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kuota tidak mencukupi untuk tanggal yang dipilih',
-                    'available_quota' => $jadwal->kuota_tersedia,
-                    'requested' => $validated['jumlah_orang'],
-                ], 400);
             }
 
             $created = $this->bookingCreationService->createGuestBooking($validated);
