@@ -103,7 +103,7 @@ return [
     */
 
     'cta' => [
-        'label' => 'Pesan Sekarang',
-        'action' => 'openBookingModal',
+        'label' => 'Hubungi Kami',
+        'action' => 'openWhatsAppContact',
     ],
 ];

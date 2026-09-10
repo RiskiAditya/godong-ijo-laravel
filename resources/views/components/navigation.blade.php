@@ -126,13 +126,18 @@
 
         {{-- CTA Button --}}
         @if(isset($cta['label']) && isset($cta['action']))
-            <button 
-                class="nav-cta" 
-                onclick="{{ $cta['action'] }}()"
-                type="button"
-            >
-                {{ $cta['label'] }}
-            </button>
+            @if($cta['action'] === 'openWhatsAppContact')
+                <a
+                    class="nav-cta"
+                    href="https://wa.me/{{ config('app.whatsapp.number') }}?text={{ urlencode('Halo, saya ingin mendapatkan informasi lebih lanjut tentang Godong Ijo.') }}"
+                    target="_blank"
+                    rel="noopener"
+                >{{ $cta['label'] }}</a>
+            @else
+                <button class="nav-cta" onclick="{{ $cta['action'] }}()" type="button">
+                    {{ $cta['label'] }}
+                </button>
+            @endif
         @endif
 
         {{-- Mobile Hamburger Toggle --}}
@@ -230,13 +235,18 @@
             {{-- Mobile CTA Button --}}
             @if(isset($cta['label']) && isset($cta['action']))
                 <li class="mobile-item mobile-cta-item" role="listitem">
-                    <button 
-                        class="mobile-cta" 
-                        onclick="{{ $cta['action'] }}(); closeMobile()"
-                        type="button"
-                    >
-                        {{ $cta['label'] }}
-                    </button>
+                    @if($cta['action'] === 'openWhatsAppContact')
+                        <a
+                            class="mobile-cta"
+                            href="https://wa.me/{{ config('app.whatsapp.number') }}?text={{ urlencode('Halo, saya ingin mendapatkan informasi lebih lanjut tentang Godong Ijo.') }}"
+                            target="_blank"
+                            rel="noopener"
+                        >{{ $cta['label'] }}</a>
+                    @else
+                        <button class="mobile-cta" onclick="{{ $cta['action'] }}(); closeMobile()" type="button">
+                            {{ $cta['label'] }}
+                        </button>
+                    @endif
                 </li>
             @endif
         </ul>
