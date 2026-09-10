@@ -12,11 +12,6 @@ class PaketWisataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Disable foreign key checks untuk truncate
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \App\Models\PaketWisata::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
         $pakets = [
             [
                 'nama_paket' => 'Paket Kuliner Keluarga',
@@ -89,7 +84,10 @@ Fasilitas:
         ];
 
         foreach ($pakets as $paket) {
-            \App\Models\PaketWisata::create($paket);
+            \App\Models\PaketWisata::updateOrCreate(
+                ['nama_paket' => $paket['nama_paket']],
+                $paket,
+            );
         }
     }
 }
