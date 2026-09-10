@@ -48,21 +48,31 @@ Fasilitas:
                 'foto' => 'images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp',
             ],
             [
-                'nama_paket' => 'Paket Private Event',
+                'nama_paket' => 'Meeting Package',
                 'jenis_paket' => 'Private Room',
-                'deskripsi' => 'Ruang privat elegan di Lantai 2 untuk acara spesial Anda. Ideal untuk seminar, gathering, arisan, meeting, hingga pesta pernikahan.
-
-Fasilitas:
-• Kapasitas hingga 100 orang
-• Ruang ber-AC di Lantai 2
-• Paket catering tersedia
-• Dekorasi sesuai kebutuhan
-• Sound system & proyektor
-• Tim event profesional',
-                'harga' => 0, // Custom price
+                'deskripsi' => 'Paket meeting untuk acara perusahaan, rapat, dan kegiatan profesional dengan pilihan half day, full day, serta VIP sesuai kebutuhan acara.',
+                'harga' => 250000,
                 'kuota' => 100,
                 'is_active' => true,
-                'foto' => 'images/placeholders/asset 3.png',
+                'foto' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
+            ],
+            [
+                'nama_paket' => 'Gathering Package',
+                'jenis_paket' => 'Private Room',
+                'deskripsi' => 'Paket gathering dengan buffet menu untuk acara perusahaan, komunitas, dan keluarga dalam pilihan half day atau full day.',
+                'harga' => 210000,
+                'kuota' => 100,
+                'is_active' => true,
+                'foto' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
+            ],
+            [
+                'nama_paket' => 'Wedding Package',
+                'jenis_paket' => 'Private Room',
+                'deskripsi' => 'Paket intimate untuk wedding dan engagement dengan suasana private room, dekorasi elegan, dan kapasitas acara yang disesuaikan.',
+                'harga' => 15000000,
+                'kuota' => 100,
+                'is_active' => true,
+                'foto' => 'images/Private Images/Dekorasi-Wedding-dan-Lamaran-2048x1137.webp',
             ],
             [
                 'nama_paket' => 'Paket Rekreasi Keluarga',
@@ -89,5 +99,11 @@ Fasilitas:
                 $paket,
             );
         }
+
+        \App\Models\PaketWisata::where('jenis_paket', 'Private Room')
+            ->whereNotIn('nama_paket', ['Meeting Package', 'Gathering Package', 'Wedding Package'])
+            ->whereDoesntHave('pemesanan')
+            ->whereDoesntHave('jadwal')
+            ->delete();
     }
 }

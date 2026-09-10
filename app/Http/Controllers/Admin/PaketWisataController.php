@@ -15,6 +15,12 @@ class PaketWisataController extends Controller
     public function index(Request $request)
     {
         $query = PaketWisata::withCount('pemesanan');
+
+        $query->where(function ($packageQuery) {
+            $packageQuery
+                ->where('jenis_paket', '!=', 'Private Room')
+                ->orWhereIn('nama_paket', ['Meeting Package', 'Gathering Package', 'Wedding Package']);
+        });
         
         // Search
         if ($request->filled('search')) {
