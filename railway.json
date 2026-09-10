@@ -5,7 +5,7 @@
     "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build"
   },
   "deploy": {
-    "startCommand": "mkdir -p storage/framework/sessions storage/framework/cache storage/framework/views && chmod -R 775 storage && export SESSION_DRIVER=array && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan storage:link && php -S 0.0.0.0:$PORT -t public",
+    "startCommand": "mkdir -p storage/framework/sessions storage/framework/cache storage/framework/views && chmod -R 775 storage && export SESSION_DRIVER=array ASSET_URL=https://godong-ijo-laravel-production.up.railway.app && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan storage:link && php -S 0.0.0.0:$PORT -t public",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
