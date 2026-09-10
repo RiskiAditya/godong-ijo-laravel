@@ -175,7 +175,22 @@
                             <div class="package-content-simple">
                                 <h3 class="package-title">{{ $package['name'] }}</h3>
                                 <p class="package-subtitle">{{ $package['duration'] }}</p>
-                                <p class="package-desc">{{ $package['description'] }}</p>
+                                @php
+                                    $homepageDescriptionParts = preg_split('/\s*Fasilitas:\s*/', $package['description'], 2);
+                                    $homepageDescription = trim($homepageDescriptionParts[0]);
+                                @endphp
+                                <p class="package-desc">{{ $homepageDescription }}</p>
+
+                                @if(!empty($package['included']))
+                                <div class="package-home-facilities">
+                                    <h4>FASILITAS</h4>
+                                    <ul>
+                                        @foreach(array_slice($package['included'], 0, 6) as $facility)
+                                            <li>{{ $facility }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                @endif
                                 
                                 <div class="package-action">
                                     <div class="package-price-tag">

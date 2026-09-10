@@ -1887,6 +1887,32 @@ h1.hero-modern-heading {
   margin: 0;
 }
 
+.package-home-facilities {
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.package-home-facilities h4 {
+  margin: 0 0 7px;
+  color: #173b2b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.package-home-facilities ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.package-home-facilities li {
+  padding-left: 2px;
+}
+
 .package-action {
   display: flex;
   align-items: center;
