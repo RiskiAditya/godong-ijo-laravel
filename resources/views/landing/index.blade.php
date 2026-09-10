@@ -175,7 +175,7 @@
                             <div class="package-content-simple">
                                 <h3 class="package-title">{{ $package['name'] }}</h3>
                                 <p class="package-subtitle">{{ $package['duration'] }}</p>
-                                <p class="package-desc">{{ Str::limit($package['description'], 100) }}</p>
+                                <p class="package-desc">{{ $package['description'] }}</p>
                                 
                                 <div class="package-action">
                                     <div class="package-price-tag">
