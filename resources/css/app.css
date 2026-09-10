@@ -7903,7 +7903,7 @@ html {
 }
 
 .education-page .school-partners-carousel-row[data-direction="right"] .school-partners-carousel-track {
-  animation: scroll-right-partners 40s linear infinite;
+  animation: scroll-right-partners 120s linear infinite;
 }
 
 .education-page .school-partners-carousel-row:hover .school-partners-carousel-track {
