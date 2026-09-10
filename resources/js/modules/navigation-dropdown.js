@@ -76,6 +76,14 @@ export function navigationDropdown() {
             this.activeAccordion = null;
             console.log('Mobile menu closed');
         },
+
+        init() {
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    this.closeMobile();
+                }
+            });
+        },
         
         toggleAccordion(key) {
             if (this.activeAccordion === key) {

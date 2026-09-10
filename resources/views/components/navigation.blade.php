@@ -154,6 +154,7 @@
     <div 
         class="mobile-nav" 
         id="mobile-nav"
+        x-cloak
         x-show="mobileOpen"
         x-transition:enter="mobile-enter"
         x-transition:enter-start="mobile-enter-start"

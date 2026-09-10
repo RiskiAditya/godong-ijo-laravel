@@ -5432,17 +5432,24 @@ h1.hero-modern-heading {
 }
 
 /* Mobile Navigation */
+[x-cloak] {
+  display: none !important;
+}
+
 .mobile-nav {
   position: fixed;
   top: 72px;
   left: 0;
   right: 0;
   bottom: 0;
+  height: calc(100dvh - 72px);
+  max-height: calc(100dvh - 72px);
   background-color: rgba(14, 42, 32, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   z-index: 1020;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 24px;
 }
 
