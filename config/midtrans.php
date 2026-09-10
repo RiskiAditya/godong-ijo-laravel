@@ -36,7 +36,10 @@ return [
     |
     */
 
-    'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+    'is_production' => env(
+        'MIDTRANS_IS_PRODUCTION',
+        str_starts_with((string) env('MIDTRANS_SERVER_KEY', ''), 'Mid-server-')
+    ),
 
     /*
     |--------------------------------------------------------------------------
