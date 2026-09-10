@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,16 @@ class AuthController extends Controller
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
+
+        // Keep first deployment usable even when the admin seeder was skipped.
+        Admin::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Administrator',
+                'email' => 'admin@godongijo.com',
+                'password' => 'admin123',
+            ],
+        );
         
         // Debug logging
         \Log::info('Admin Login Attempt', [
