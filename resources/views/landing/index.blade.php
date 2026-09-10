@@ -181,6 +181,20 @@
                                 @endphp
                                 <p class="package-desc">{{ $homepageDescription }}</p>
 
+                                @if(!empty($package['privateRoomOptions']))
+                                <div class="package-home-facilities package-home-options">
+                                    <h4>PILIHAN PAKET</h4>
+                                    <ul>
+                                        @foreach($package['privateRoomOptions'] as $privateOption)
+                                            <li>
+                                                <strong>{{ $privateOption['label'] }}</strong><br>
+                                                <span>{{ $privateOption['description'] }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                @endif
+
                                 @if(!empty($package['included']))
                                 <div class="package-home-facilities">
                                     <h4>FASILITAS</h4>

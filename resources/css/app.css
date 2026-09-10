@@ -1913,6 +1913,24 @@ h1.hero-modern-heading {
   padding-left: 2px;
 }
 
+.package-home-options li {
+  margin-bottom: 8px;
+}
+
+.package-home-options li:last-child {
+  margin-bottom: 0;
+}
+
+.package-home-options strong {
+  color: #334155;
+  font-weight: 700;
+}
+
+.package-home-options span {
+  color: #64748b;
+  font-size: 12px;
+}
+
 .package-action {
   display: flex;
   align-items: center;

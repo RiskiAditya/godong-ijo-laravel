@@ -10,7 +10,7 @@ class PrivateRoomPackageCatalog
             [
                 'key' => 'meeting',
                 'name' => 'Meeting Package',
-                'description' => 'Pilihan meeting half day, full day, dan VIP.',
+                'description' => 'Paket meeting untuk acara perusahaan, rapat, dan kegiatan profesional dengan pilihan half day, full day, serta VIP sesuai kebutuhan acara.',
                 'image' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
                 'options' => [
                     [
@@ -48,7 +48,7 @@ class PrivateRoomPackageCatalog
             [
                 'key' => 'gathering',
                 'name' => 'Gathering Package',
-                'description' => 'Paket buffet untuk gathering half day dan full day.',
+                'description' => 'Paket gathering dengan buffet menu untuk acara perusahaan, komunitas, dan keluarga dalam pilihan half day atau full day.',
                 'image' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
                 'options' => [
                     [
@@ -76,7 +76,7 @@ class PrivateRoomPackageCatalog
             [
                 'key' => 'wedding_engagement',
                 'name' => 'Wedding Package',
-                'description' => 'Paket intimate untuk wedding dan engagement.',
+                'description' => 'Paket intimate untuk wedding dan engagement dengan suasana private room, dekorasi elegan, dan kapasitas acara yang disesuaikan.',
                 'image' => 'images/Private Images/Dekorasi-Wedding-dan-Lamaran-2048x1137.webp',
                 'options' => [
                     [
