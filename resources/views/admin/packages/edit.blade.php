@@ -4,6 +4,34 @@
 @section('page-title', 'Edit Paket')
 
 @section('content')
+<style>
+    .package-page-head .page-back-link,
+    .package-page-head .page-back-link .page-back-icon {
+        font-size: 12px !important;
+        line-height: 1 !important;
+    }
+
+    .package-page-head .page-back-link .page-back-icon {
+        display: inline-block !important;
+        width: 14px !important;
+        height: 14px !important;
+        flex: 0 0 14px !important;
+    }
+
+    .package-form svg {
+        width: 16px !important;
+        height: 16px !important;
+        max-width: 16px !important;
+        max-height: 16px !important;
+    }
+
+    .package-form .photo-upload-icon svg {
+        width: 22px !important;
+        height: 22px !important;
+        max-width: 22px !important;
+        max-height: 22px !important;
+    }
+</style>
 <div class="page-head package-page-head">
     <div>
         <span class="page-kicker">KATALOG &middot; PAKET WISATA</span>
