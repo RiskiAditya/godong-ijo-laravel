@@ -77,42 +77,6 @@
             ctaLink="#contact"
         />
     @else
-        @if($category === 'private-room')
-            <section class="private-room-catalog">
-                <div class="private-room-catalog-intro">
-                    <h2>Pilih konsep acara Anda</h2>
-                    <p>Lihat referensi paket di bawah, lalu pilih paket dan detail acara langsung di form reservasi.</p>
-                </div>
-                <div class="private-room-brochures">
-                    @foreach($categoryMeta['brochure_images'] ?? [] as $index => $brochure)
-                        <figure class="private-room-brochure">
-                            <img src="{{ asset($brochure) }}" alt="Referensi paket Private Room {{ $index + 1 }}" loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
-                        </figure>
-                    @endforeach
-                </div>
-                <div class="private-room-catalog-action">
-                    @php
-                        $firstPrivatePackage = $packages->first();
-                    @endphp
-                    @if($firstPrivatePackage)
-                        @php
-                            $firstPrivateConfig = $firstPrivatePackage->booking_config ?? [];
-                        @endphp
-                        <button
-                            type="button"
-                            class="package-cta btn-pesan"
-                            data-booking-type="private-room"
-                            data-package-id="{{ $firstPrivatePackage->id }}"
-                            data-package-name="{{ $firstPrivatePackage->nama_paket }}"
-                            data-package-price="{{ $firstPrivatePackage->harga }}"
-                            data-package-image="{{ asset($firstPrivatePackage->foto ?: 'images/Private Images/BCA-Gathering-2048x1137.webp') }}"
-                            data-package-config="{{ base64_encode(json_encode($firstPrivateConfig)) }}">
-                            Pilih Paket & Reservasi
-                        </button>
-                    @endif
-                </div>
-            </section>
-        @else
         <section class="packages-section">
             <div class="packages-grid horizontal-scroll">
                 @foreach($packages as $package)
@@ -260,13 +224,12 @@
                 @endforeach
             </div>
         </section>
-        @endif
     @endif
 </div>
 
 {{-- Booking Modal Components --}}
 <x-booking-modal-simple />
-@include('components.private-room-booking-modal', ['privateRoomPackages' => $category === 'private-room' ? $packages : []])
+@include('components.private-room-booking-modal')
 @include('components.fishing-booking-modal')
 @endsection
 

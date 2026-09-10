@@ -39,21 +39,6 @@ function parsePrivateRoomConfig(button) {
     return JSON.parse(atob(button.dataset.packageConfig));
 }
 
-function selectPrivateRoomPackage(option) {
-    const config = JSON.parse(atob(option.dataset.config));
-    openPrivateRoomModal({
-        id: option.value,
-        name: option.dataset.name,
-        price: option.dataset.price,
-        image: option.dataset.image,
-        type: config.price_type,
-        minimum: config.minimum_pax,
-        event: config.event_type,
-        duration: config.duration,
-        config,
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('privateRoomBookingModal');
     const form = document.getElementById('privateRoomBookingForm');
@@ -80,9 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target === modal || event.target.closest('[data-private-room-close]')) closePrivateRoomModal();
     });
     document.getElementById('privateRoomPax')?.addEventListener('input', updatePrivateRoomTotal);
-    document.getElementById('privateRoomPackageChoice')?.addEventListener('change', event => {
-        selectPrivateRoomPackage(event.target.selectedOptions[0]);
-    });
 
     form.addEventListener('submit', async event => {
         event.preventDefault();

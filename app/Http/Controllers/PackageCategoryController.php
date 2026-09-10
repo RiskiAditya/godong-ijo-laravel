@@ -75,11 +75,6 @@ class PackageCategoryController extends Controller
             'name' => 'Paket Private Room',
             'description' => 'Ruang privat untuk acara spesial dan gathering',
             'default_image' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
-            'brochure_images' => [
-                'images/Private Images/Paket-Wedding-dan-Engagement-1536x701.webp',
-                'images/Private Images/Paket-Gathering-2048x934.webp',
-                'images/Private Images/Paket-Meeting-1536x701.webp',
-            ],
         ],
         'fishing-lake' => [
             'name' => 'Paket Fishing Lake',
