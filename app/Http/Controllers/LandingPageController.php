@@ -48,6 +48,8 @@ class LandingPageController extends Controller
      */
     public function index(): View
     {
+        $this->ensureCorePackagesExist();
+
         // Ambil data paket dari database
         $pakets_db = PaketWisata::where('is_active', true)->get();
         
@@ -70,6 +72,43 @@ class LandingPageController extends Controller
         ];
 
         return view('landing.index', $pageData);
+    }
+
+    private function ensureCorePackagesExist(): void
+    {
+        $corePackages = [
+            [
+                'nama_paket' => 'Paket Kuliner Keluarga',
+                'jenis_paket' => 'The Waterfall Resto',
+                'deskripsi' => 'Nikmati pengalaman kuliner ekologis di The Waterfall Resto dengan menu Eropa dan Nusantara di tengah suasana air terjun mini yang asri.',
+                'harga' => 75000,
+                'kuota' => 100,
+                'foto' => 'images/placeholders/asset 3.webp',
+            ],
+            [
+                'nama_paket' => 'Paket Sport Fishing',
+                'jenis_paket' => 'Fishing Lake',
+                'deskripsi' => 'Tantangan memancing ikan raksasa di Monster Fish Fishing Lake dengan pengalaman sport fishing yang tak terlupakan.',
+                'harga' => 0,
+                'kuota' => 50,
+                'foto' => 'images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp',
+            ],
+            [
+                'nama_paket' => 'Paket Rekreasi Keluarga',
+                'jenis_paket' => 'The Waterfall Resto',
+                'deskripsi' => 'Paket lengkap untuk liburan keluarga: makan di The Waterfall Resto, Mini Zoo, Kids Area, dan fishing experience.',
+                'harga' => 150000,
+                'kuota' => 80,
+                'foto' => 'images/placeholders/hewan.jpg',
+            ],
+        ];
+
+        foreach ($corePackages as $package) {
+            PaketWisata::firstOrCreate(
+                ['nama_paket' => $package['nama_paket']],
+                $package + ['is_active' => true],
+            );
+        }
     }
 
     /**
