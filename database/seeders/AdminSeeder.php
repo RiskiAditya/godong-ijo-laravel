@@ -12,11 +12,13 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Admin::create([
-            'name' => 'Administrator',
-            'username' => 'admin',
-            'email' => 'admin@godongijo.com',
-            'password' => bcrypt('admin123'), // Ganti password ini setelah login pertama kali
-        ]);
+        \App\Models\Admin::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Administrator',
+                'email' => 'admin@godongijo.com',
+                'password' => 'admin123',
+            ],
+        );
     }
 }
