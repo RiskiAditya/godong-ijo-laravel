@@ -203,38 +203,6 @@
             margin-bottom: 20px;
         }
         
-        .checkbox-left {
-            display: flex;
-            align-items: center;
-        }
-        
-        .checkbox-input {
-            width: 16px;
-            height: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-            cursor: pointer;
-            accent-color: #2d5a27;
-        }
-        
-        .checkbox-label {
-            margin-left: 8px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-        }
-        
-        .forgot-link {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .forgot-link:hover {
-            color: rgba(255, 255, 255, 0.95);
-        }
-        
         /* Submit Button */
         .btn-submit {
             width: 100%;
@@ -279,50 +247,6 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        /* Credentials Card */
-        .credentials-card {
-            margin-top: 20px;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-        }
-        
-        .credentials-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-        
-        .credentials-item {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 6px;
-        }
-        
-        .credentials-code {
-            display: inline-block;
-            padding: 2px 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-left: 6px;
-        }
-        
-        .credentials-note {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         /* Footer */
@@ -432,34 +356,11 @@
                         @enderror
                     </div>
                     
-                    <!-- Remember Me -->
-                    <div class="checkbox-wrapper">
-                        <div class="checkbox-left">
-                            <input type="checkbox" name="remember" id="remember" class="checkbox-input">
-                            <label for="remember" class="checkbox-label">Remember me</label>
-                        </div>
-                        <a href="#" class="forgot-link">Forgot password?</a>
-                    </div>
-                    
                     <!-- Submit Button -->
                     <button type="submit" class="btn-submit" id="submitBtn">
                         <span id="btnText">Log in</span>
                         <div id="btnSpinner" class="btn-spinner" style="display: none;"></div>
                     </button>                
-                <!-- Default Credentials -->
-                <div class="credentials-card">
-                    <div class="credentials-title">Kredensial Default</div>
-                    <div class="credentials-item">
-                        Username:<span class="credentials-code">admin</span>
-                    </div>
-                    <div class="credentials-item">
-                        Password:<span class="credentials-code">admin123</span>
-                    </div>
-                    <div class="credentials-note">
-                        ⚠️ Harap ganti password setelah login pertama kali untuk keamanan sistem
-                    </div>
-                </div>
-                
                 <div class="form-footer">
                     © {{ date('Y') }} Godong Ijo Ecotainment & Resto
                 </div>
