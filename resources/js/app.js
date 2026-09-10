@@ -755,7 +755,6 @@ async function initBookingFormEnhancement() {
 
 // Initialization
 function init() {
-  initMobileNav();
   initSmoothScrolling(); // Use imported smooth scroll module
   initNavbarScroll();
   initActiveNavHighlight();
