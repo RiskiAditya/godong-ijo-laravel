@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $whatsappContactUrl = 'https://wa.me/' . config('app.whatsapp.number') . '?text=' . urlencode('Halo, saya ingin mendapatkan informasi lebih lanjut tentang Godong Ijo.');
+    @endphp
+
     {{-- ======================================
          HERO SECTION (Modern Travel Style)
          ====================================== --}}
@@ -74,7 +78,7 @@
                         @endforeach
                     </div>
 
-                    <a href="#contact" class="btn btn-primary">Hubungi Kami</a>
+                    <a href="{{ $whatsappContactUrl }}" class="btn btn-primary" target="_blank" rel="noopener">Hubungi Kami</a>
                 </div>
 
                 <div class="experience-images scroll-reveal scroll-reveal-delay-2">
@@ -262,7 +266,7 @@
 
             <div class="section-cta scroll-reveal" style="margin-top: 48px;">
                 <p class="packages-custom-text">Butuh paket custom atau informasi lebih lanjut?</p>
-                <a href="#contact" class="btn btn-outline-green">Hubungi Kami</a>
+                <a href="{{ $whatsappContactUrl }}" class="btn btn-outline-green" target="_blank" rel="noopener">Hubungi Kami</a>
             </div>
         </div>
     </section>
@@ -282,7 +286,7 @@
                 rekreasi di destinasi paling ekologis di Indonesia.
             </p>
             <div class="cta-banner-buttons">
-                <a href="#contact" class="btn btn-primary btn-lg">Hubungi Kami</a>
+                <a href="{{ $whatsappContactUrl }}" class="btn btn-primary btn-lg" target="_blank" rel="noopener">Hubungi Kami</a>
                 <a href="#packages" class="btn btn-glass">Lihat Paket</a>
             </div>
         </div>
