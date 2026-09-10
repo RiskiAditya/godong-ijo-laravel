@@ -1943,6 +1943,10 @@ tbody tr:hover .status {
 .page-back-link {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: max-content;
+  line-height: 1;
   padding: 9px 13px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -1951,6 +1955,15 @@ tbody tr:hover .status {
   font-size: 12px;
   font-weight: 700;
   transition: var(--transition);
+}
+
+.page-back-link .page-back-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  font-size: 16px;
+  line-height: 14px;
+  flex: 0 0 14px;
 }
 
 .page-back-link:hover {

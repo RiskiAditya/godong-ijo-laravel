@@ -10,7 +10,10 @@
         <h1>Edit Paket Wisata</h1>
         <p class="page-sub">Perbarui informasi paket, harga, foto, dan status publikasi.</p>
     </div>
-    <a class="page-back-link" href="{{ route('admin.paket-wisata.index') }}">&larr; Daftar Paket</a>
+    <a class="page-back-link" href="{{ route('admin.paket-wisata.index') }}">
+        <span class="page-back-icon" aria-hidden="true">&larr;</span>
+        <span>Daftar Paket</span>
+    </a>
 </div>
 
 <form class="package-form" method="POST" action="{{ route('admin.paket-wisata.update', $paket->id) }}" enctype="multipart/form-data">
