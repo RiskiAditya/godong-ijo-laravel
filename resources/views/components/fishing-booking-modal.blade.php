@@ -412,7 +412,9 @@
 }
 </style>
 
-<div x-data="fishingBookingModal()" 
+@php($fishingPricing = app(\App\Services\BookingPricingService::class)->getFishingPricingConfig())
+
+<div x-data="fishingBookingModal(@js($fishingPricing))" 
      x-init="init()"
      @open-fishing-modal.window="console.log('🎣 Event received!'); openModal()"
      x-show="isOpen" 

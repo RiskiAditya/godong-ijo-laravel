@@ -107,6 +107,14 @@ class PackagePageTest extends TestCase
         $this->assertSame('The Waterfall Resto', PackageTypeCatalog::normalize('The Waterfall Resto'));
     }
 
+    public function test_private_room_booking_modal_has_mobile_responsive_css(): void
+    {
+        $html = view('components.private-room-booking-modal')->render();
+
+        $this->assertStringContainsString('@media (max-width: 768px)', $html);
+        $this->assertStringContainsString('.private-room-grid { grid-template-columns: 1fr; }', $html);
+    }
+
     public function test_seo_canonical_url_uses_correct_route_parameter_name_for_category_pages(): void
     {
         $seo = new SEOService();

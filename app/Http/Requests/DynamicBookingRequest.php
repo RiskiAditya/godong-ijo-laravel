@@ -9,19 +9,11 @@ use Illuminate\Validation\Rule;
 
 class DynamicBookingRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $normalizedJenisPaket = $this->normalizeJenisPaket($this->input('jenis_paket'));
@@ -62,40 +54,36 @@ class DynamicBookingRequest extends FormRequest
             ],
         ];
 
-        // Package-specific validation based on jenis_paket
-        $jenispaket = $normalizedJenisPaket ?? $this->input('jenis_paket');
+        $jenisPaket = $normalizedJenisPaket ?? $this->input('jenis_paket');
 
-        switch ($jenispaket) {
+        return array_merge($rules, $this->packageSpecificRules($jenisPaket));
+    }
+
+    private function packageSpecificRules(?string $jenisPaket): array
+    {
+        switch ($jenisPaket) {
             case 'the_waterfall_resto':
-                $rules = array_merge($rules, [
+                return [
                     'package_specific_data.number_of_people' => ['required', 'integer', 'min:1'],
                     'package_specific_data.time_slot' => ['required', Rule::in(['lunch', 'dinner'])],
                     'package_specific_data.dietary_requirements' => ['nullable', 'string', 'max:500'],
                     'package_specific_data.table_preference' => ['nullable', Rule::in(['indoor', 'outdoor', 'near_waterfall'])],
-                ]);
-                break;
+                ];
 
             case 'fishing_lake':
-                $rules = array_merge($rules, [
-                    'package_specific_data.fishing_type' => [
-                        'required',
-                        Rule::in(FishingTypeCatalog::DYNAMIC_TYPES)
-                    ],
+                return [
+                    'package_specific_data.fishing_type' => ['required', Rule::in(FishingTypeCatalog::DYNAMIC_TYPES)],
                     'package_specific_data.number_of_rods' => ['required', 'integer', 'min:1'],
                     'package_specific_data.duration' => ['required', 'string'],
                     'package_specific_data.equipment_rental' => ['nullable', 'boolean'],
                     'package_specific_data.bait_anak_ikan' => ['nullable', 'integer', 'min:0'],
                     'package_specific_data.bait_umpan_jadi' => ['nullable', 'integer', 'min:0'],
                     'package_specific_data.terms_agreement' => ['required', 'accepted'],
-                ]);
-                break;
+                ];
 
             case 'private_room':
-                $rules = array_merge($rules, [
-                    'package_specific_data.event_type' => [
-                        'required',
-                        Rule::in(['gathering', 'meeting', 'wedding', 'engagement', 'other'])
-                    ],
+                return [
+                    'package_specific_data.event_type' => ['required', Rule::in(['gathering', 'meeting', 'wedding', 'engagement', 'other'])],
                     'package_specific_data.expected_attendees' => ['required', 'integer', 'min:10'],
                     'package_specific_data.event_duration' => ['required', Rule::in(['half_day', 'full_day', 'custom'])],
                     'package_specific_data.custom_duration' => ['required_if:package_specific_data.event_duration,custom', 'nullable', 'string', 'max:100'],
@@ -104,11 +92,11 @@ class DynamicBookingRequest extends FormRequest
                     'package_specific_data.decoration_required' => ['required', 'boolean'],
                     'package_specific_data.av_equipment' => ['nullable', 'array'],
                     'package_specific_data.av_equipment.*' => [Rule::in(['projector', 'sound_system', 'microphone', 'whiteboard'])],
-                ]);
-                break;
-        }
+                ];
 
-        return $rules;
+            default:
+                return [];
+        }
     }
 
     /**
@@ -230,200 +218,96 @@ class DynamicBookingRequest extends FormRequest
         return PackageTypeCatalog::normalizeInternal($trimmed);
     }
 
-    /**
-     * Helper method to strip HTML tags and their content (for script/style tags)
-     * 
-     * @param string $value
-     * @return string
-     */
     private function stripHtmlTags(string $value): string
     {
-        // Remove script and style tags along with their content
-        $value = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/is', '', $value);
-        // Remove all remaining HTML tags
-        $value = strip_tags($value);
-        return $value;
+        if (preg_match('/^\s*<(script|style)\b[^>]*>.*?<\/\1>\s*$/is', $value)) {
+            $value = preg_replace('/^\s*<(script|style)\b[^>]*>|<\/\1>\s*$/is', '', $value);
+        } else {
+            $value = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $value);
+        }
+
+        return strip_tags($value);
     }
 
-    /**
-     * Prepare the data for validation.
-     * 
-     * Implements input sanitization per requirements 25.1-25.5:
-     * - 25.1: Strip HTML tags from text inputs except notes
-     * - 25.2: Escape special characters in notes field
-     * - 25.3: Trim whitespace from all text inputs
-     * - 25.4: Normalize phone number to standard Indonesian format
-     * - 25.5: Convert all inputs to UTF-8 encoding
-     */
     protected function prepareForValidation(): void
     {
-        // Sanitize inputs before validation
         $sanitized = [];
 
-        // 25.1, 25.3: Strip HTML tags and trim whitespace from nama_lengkap
-        if ($this->has('nama_lengkap')) {
-            $value = $this->input('nama_lengkap');
-            // 25.5: Ensure UTF-8 encoding
-            $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-            // 25.3: Trim whitespace
-            $value = trim($value);
-            // 25.1: Strip HTML tags and script/style content
-            $value = $this->stripHtmlTags($value);
-            $sanitized['nama_lengkap'] = $value;
+        foreach (['nama_lengkap', 'email'] as $field) {
+            if ($this->has($field)) {
+                $sanitized[$field] = $this->sanitizeText($this->input($field));
+            }
         }
 
-        // 25.1, 25.3: Strip HTML tags and trim whitespace from email
-        if ($this->has('email')) {
-            $value = $this->input('email');
-            // 25.5: Ensure UTF-8 encoding
-            $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-            // 25.3: Trim whitespace
-            $value = trim($value);
-            // 25.1: Strip HTML tags and script/style content
-            $value = $this->stripHtmlTags($value);
-            $sanitized['email'] = $value;
-        }
-
-        // 25.3, 25.4: Normalize phone number to standard Indonesian format
         if ($this->has('no_hp')) {
-            $phone = $this->input('no_hp');
-            // 25.5: Ensure UTF-8 encoding
-            $phone = mb_convert_encoding($phone, 'UTF-8', 'UTF-8');
-            // 25.3: Trim whitespace
-            $phone = trim($phone);
-            // 25.4: Normalize to standard format - remove spaces and special chars except +
-            $phone = preg_replace('/[^0-9+]/', '', $phone);
-            // 25.4: Standardize prefix format
-            if (preg_match('/^0/', $phone)) {
-                // Convert 08xxx to 628xxx
-                $phone = '62' . substr($phone, 1);
-            } elseif (preg_match('/^\+62/', $phone)) {
-                // Convert +62xxx to 62xxx
-                $phone = substr($phone, 1);
-            }
-            $sanitized['no_hp'] = $phone;
+            $sanitized['no_hp'] = $this->normalizePhoneNumber($this->input('no_hp'));
         }
 
-        // 25.2, 25.3: Escape special characters in notes field
         if ($this->has('catatan')) {
-            $value = $this->input('catatan');
-            // 25.5: Ensure UTF-8 encoding
-            $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-            // 25.3: Trim whitespace
-            $value = trim($value);
-            // 25.2: Escape special characters for safe storage (HTML entities)
-            $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-            $sanitized['catatan'] = $value;
+            $sanitized['catatan'] = htmlspecialchars(trim((string) $this->input('catatan')), ENT_QUOTES, 'UTF-8');
         }
 
-        // 25.3: Trim whitespace from tanggal_kunjungan
         if ($this->has('tanggal_kunjungan')) {
-            $value = $this->input('tanggal_kunjungan');
-            $sanitized['tanggal_kunjungan'] = trim($value);
+            $sanitized['tanggal_kunjungan'] = trim((string) $this->input('tanggal_kunjungan'));
         }
 
-        // Sanitize package-specific data
         if ($this->has('package_specific_data')) {
-            $packageData = $this->input('package_specific_data');
-            
-            // 25.1, 25.3: Sanitize dietary_requirements (culinary package)
-            if (isset($packageData['dietary_requirements'])) {
-                $value = $packageData['dietary_requirements'];
-                // 25.5: Ensure UTF-8 encoding
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                // 25.3: Trim whitespace
-                $value = trim($value);
-                // 25.1: Strip HTML tags and script/style content
-                $value = $this->stripHtmlTags($value);
-                $packageData['dietary_requirements'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize table_preference (culinary package)
-            if (isset($packageData['table_preference'])) {
-                $value = $packageData['table_preference'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = $this->stripHtmlTags($value);
-                $packageData['table_preference'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize time_slot (culinary package)
-            if (isset($packageData['time_slot'])) {
-                $value = $packageData['time_slot'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = $this->stripHtmlTags($value);
-                $packageData['time_slot'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize fishing_type (fishing package)
-            if (isset($packageData['fishing_type'])) {
-                $value = $packageData['fishing_type'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = $this->stripHtmlTags($value);
-                $packageData['fishing_type'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize duration (fishing package)
-            if (isset($packageData['duration'])) {
-                $value = $packageData['duration'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = $this->stripHtmlTags($value);
-                $packageData['duration'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize event_type (private room package)
-            if (isset($packageData['event_type'])) {
-                $value = $packageData['event_type'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = $this->stripHtmlTags($value);
-                $packageData['event_type'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize custom_duration (private room package)
-            if (isset($packageData['custom_duration'])) {
-                $value = $packageData['custom_duration'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = strip_tags($value);
-                $packageData['custom_duration'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize event_duration (private room package)
-            if (isset($packageData['event_duration'])) {
-                $value = $packageData['event_duration'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = strip_tags($value);
-                $packageData['event_duration'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize setup_preference (private room package)
-            if (isset($packageData['setup_preference'])) {
-                $value = $packageData['setup_preference'];
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                $value = trim($value);
-                $value = strip_tags($value);
-                $packageData['setup_preference'] = $value;
-            }
-            
-            // 25.1, 25.3: Sanitize av_equipment array (private room package)
-            if (isset($packageData['av_equipment']) && is_array($packageData['av_equipment'])) {
-                $packageData['av_equipment'] = array_map(function($item) {
-                    $item = mb_convert_encoding($item, 'UTF-8', 'UTF-8');
-                    $item = trim($item);
-                    $item = strip_tags($item);
-                    return $item;
-                }, $packageData['av_equipment']);
-            }
-
-            $sanitized['package_specific_data'] = $packageData;
+            $sanitized['package_specific_data'] = $this->sanitizePackageSpecificData($this->input('package_specific_data'));
         }
 
-        // Merge sanitized data back
-        $this->merge($sanitized);
+        if ($sanitized !== []) {
+            $this->merge($sanitized);
+        }
+    }
+
+    private function sanitizeText(mixed $value): string
+    {
+        $value = mb_convert_encoding((string) $value, 'UTF-8', 'UTF-8');
+
+        return $this->stripHtmlTags(trim($value));
+    }
+
+    private function normalizePhoneNumber(mixed $value): string
+    {
+        $phone = mb_convert_encoding((string) $value, 'UTF-8', 'UTF-8');
+        $phone = trim($phone);
+        $phone = preg_replace('/[^0-9+]/', '', $phone);
+
+        if (preg_match('/^0/', $phone)) {
+            return '62' . substr($phone, 1);
+        }
+
+        if (preg_match('/^\+62/', $phone)) {
+            return substr($phone, 1);
+        }
+
+        return $phone;
+    }
+
+    private function sanitizePackageSpecificData(array $packageData): array
+    {
+        $fieldsToSanitize = [
+            'dietary_requirements',
+            'table_preference',
+            'time_slot',
+            'fishing_type',
+            'duration',
+            'event_type',
+            'custom_duration',
+            'event_duration',
+            'setup_preference',
+        ];
+
+        foreach ($fieldsToSanitize as $field) {
+            if (isset($packageData[$field])) {
+                $packageData[$field] = $this->sanitizeText($packageData[$field]);
+            }
+        }
+
+        if (isset($packageData['av_equipment']) && is_array($packageData['av_equipment'])) {
+            $packageData['av_equipment'] = array_map(fn ($item) => $this->sanitizeText($item), $packageData['av_equipment']);
+        }
+
+        return $packageData;
     }
 }

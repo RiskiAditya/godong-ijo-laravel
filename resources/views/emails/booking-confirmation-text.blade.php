@@ -16,7 +16,7 @@ Tanggal Kunjungan : {{ \Carbon\Carbon::parse($pemesanan->tanggal_kunjungan ?? $j
 Jumlah Orang      : {{ $pemesanan->jumlah_orang }} orang
 
 -------------------------------------------------
-TOTAL PEMBAYARAN  : Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}
+TOTAL PEMBAYARAN  : {{ $pemesanan->total_harga !== null ? 'Rp ' . number_format($pemesanan->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}
 -------------------------------------------------
 
 =================================================

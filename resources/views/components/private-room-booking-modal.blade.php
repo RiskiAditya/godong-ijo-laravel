@@ -18,7 +18,15 @@
 .private-room-submit { width: 100%; border: 0; border-radius: 11px; padding: .85rem 1rem; color: white; background: #0f766e; font-weight: 800; cursor: pointer; }
 .private-room-submit:disabled { opacity: .65; cursor: wait; }
 .private-room-error { display: none; margin-bottom: .8rem; padding: .7rem; border-radius: 9px; color: #991b1b; background: #fee2e2; font-size: .88rem; }
-@media (max-width: 560px) { .private-room-grid, .private-room-summary { grid-template-columns: 1fr; } .private-room-summary img { width: 100%; height: 150px; } }
+@media (max-width: 768px) {
+    .private-room-dialog { width: min(100%, 620px); }
+    .private-room-head { padding: 1rem; }
+    .private-room-body { padding: 1rem; }
+    .private-room-grid { grid-template-columns: 1fr; }
+    .private-room-summary { grid-template-columns: 1fr; align-items: stretch; }
+    .private-room-summary img { width: 100%; height: 160px; }
+    .private-room-total { flex-wrap: wrap; }
+}
 </style>
 
 <div id="privateRoomBookingModal" class="private-room-modal" role="dialog" aria-modal="true" aria-labelledby="privateRoomModalTitle">

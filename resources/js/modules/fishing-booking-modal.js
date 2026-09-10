@@ -1,5 +1,12 @@
-function fishingBookingModal() {
+function fishingBookingModal(pricing = {}) {
   return {
+    pricing: {
+      basePrice: Number(pricing.base_price || 0),
+      komet: Number(pricing.komet || 0),
+      umpanJadi: Number(pricing.umpan_jadi || 0),
+      sewaAlat: Number(pricing.sewa_alat || 0),
+      tambahanJam: Number(pricing.tambahan_jam || 0)
+    },
     isOpen: false,
     loading: false,
     step: 1,
@@ -98,18 +105,18 @@ function fishingBookingModal() {
 
     calculatePrice() {
       const jumlahJoran = Math.max(1, Number(this.formData.jumlah_joran || 1));
-      const umpanTotal = (Number(this.formData.qty_komet) * 11000) + (Number(this.formData.qty_umpan_jadi) * 11000);
+      const umpanTotal = (Number(this.formData.qty_komet) * this.pricing.komet)
+        + (Number(this.formData.qty_umpan_jadi) * this.pricing.umpanJadi);
       let sewaTotal = 0;
-      if (this.formData.jenis_pemancingan === 'sewa_joran' || this.formData.perlu_sewa_alat) {
-        const hargaUkuran = this.formData.ukuran_joran === 'standar' ? 20000 : this.formData.ukuran_joran === 'besar' ? 50000 : 0;
-        sewaTotal = hargaUkuran * jumlahJoran;
+      if (this.formData.perlu_sewa_alat && this.formData.ukuran_joran) {
+        sewaTotal = this.pricing.sewaAlat;
       }
       let mancingTotal = 0;
-      if (this.formData.jenis_pemancingan === 'tarikan') {
-        const hargaDurasi = this.formData.durasi === '2' ? 80000 : this.formData.durasi === '4' ? 110000 : 0;
-        mancingTotal = (hargaDurasi + (Number(this.formData.tambahan_jam) * 40000)) * jumlahJoran;
-      } else if (this.formData.jenis_pemancingan === 'jackpot') {
-        mancingTotal = 210000 * jumlahJoran;
+      if (this.formData.jenis_pemancingan !== 'kiloan') {
+        mancingTotal = this.pricing.basePrice * jumlahJoran;
+        if (this.formData.jenis_pemancingan === 'tarikan') {
+          mancingTotal += Number(this.formData.tambahan_jam) * this.pricing.tambahanJam;
+        }
       }
       this.estimatedPrice = mancingTotal + sewaTotal + umpanTotal;
       this.priceDisplay = this.formData.jenis_pemancingan === 'kiloan'
@@ -145,7 +152,7 @@ function fishingBookingModal() {
 
       this.loading = true;
       try {
-        const response = await fetch('/booking/fishing', {
+        const response = await fetch('/api/booking/fishing', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

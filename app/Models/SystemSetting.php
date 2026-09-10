@@ -19,4 +19,14 @@ class SystemSetting extends Model
     {
         static::updateOrCreate(['key' => $key], ['value' => $value ? '1' : '0']);
     }
+
+    public static function value(string $key, ?string $default = null): ?string
+    {
+        return static::where('key', $key)->value('value') ?? $default;
+    }
+
+    public static function put(string $key, ?string $value): void
+    {
+        static::updateOrCreate(['key' => $key], ['value' => $value]);
+    }
 }

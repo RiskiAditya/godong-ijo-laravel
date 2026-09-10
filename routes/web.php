@@ -123,6 +123,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('bookings', BookingController::class)->except(['create', 'store', 'edit']);
         Route::post('bookings/{booking}/update-status', [BookingController::class, 'updateStatus'])->name('bookings.update-status');
         Route::post('bookings/{booking}/send-email', [BookingController::class, 'sendEmail'])->name('bookings.send-email');
+        Route::post('bookings/{booking}/finalize-kiloan', [BookingController::class, 'finalizeKiloan'])->name('bookings.finalize-kiloan');
         Route::get('bookings-export', [BookingController::class, 'export'])->name('bookings.export');
         
         // Paket Wisata management (packages)
@@ -175,11 +176,6 @@ Route::prefix('api')->middleware(['web', 'throttle:10,1'])->group(function () {
     // Social proof counter for trust badges - Less restrictive limit
     Route::get('stats/bookings-today', [App\Http\Controllers\BookingController::class, 'bookingsToday'])->name('api.stats.bookings-today');
 });
-
-// Public direct route used by the landing page modal - Rate limited
-Route::post('booking/fishing', [App\Http\Controllers\BookingController::class, 'storeFishingBooking'])
-    ->middleware(['web', 'throttle:10,1'])
-    ->name('booking.fishing');
 
 Route::middleware(['web'])->group(function () {
     

@@ -37,29 +37,6 @@
         />
     @endif
 
-    @if(isset($pageData['platformFieldtrip']))
-        <section class="education-section platform-fieldtrip-section" id="platform-fieldtrip" aria-labelledby="platform-fieldtrip-title">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-badge">Platform Fieldtrip</span>
-                    <h2 class="section-title" id="platform-fieldtrip-title">Pilih Cara Belajar yang Paling Pas</h2>
-                    <p class="section-subtitle">Tersedia untuk sekolah yang ingin datang langsung, belajar jarak jauh, atau membawa pengalaman edukasi ke kelas.</p>
-                </div>
-
-                <x-education.card-grid
-                    :cards="$pageData['platformFieldtrip']"
-                    :columns="3"
-                    section-id="platform-fieldtrip-grid"
-                />
-
-                <x-education.card-carousel
-                    :cards="$pageData['platformFieldtrip']"
-                    carousel-id="platform-fieldtrip-carousel"
-                />
-            </div>
-        </section>
-    @endif
-
     @if(isset($pageData['programCategories']))
         <section class="education-section education-section-alt" id="program-categories" aria-labelledby="program-categories-title">
             <div class="container">

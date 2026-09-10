@@ -45,7 +45,7 @@
                                             </tr>
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Paket Wisata</td>
-                                                <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $paket->nama_paket }}</td>
+                                                <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $paket?->nama_paket ?? 'Paket Wisata' }}</td>
                                             </tr>
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Tanggal Kunjungan</td>
@@ -65,7 +65,9 @@
                                         <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color: #667eea; margin-top: 20px;">
                                             <tr>
                                                 <td style="font-size: 18px; color: white; font-weight: 600;">Total Pembayaran</td>
-                                                <td style="font-size: 18px; color: white; font-weight: 600; text-align: right;">Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}</td>
+                                                <td style="font-size: 18px; color: white; font-weight: 600; text-align: right;">
+                                                    {{ $pemesanan->total_harga !== null ? 'Rp ' . number_format($pemesanan->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}
+                                                </td>
                                             </tr>
                                         </table>
                                     </td>

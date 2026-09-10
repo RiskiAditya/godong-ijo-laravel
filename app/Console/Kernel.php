@@ -20,6 +20,10 @@ class Kernel extends ConsoleKernel
             ->dailyAt('09:00')
             ->timezone('Asia/Jakarta')
             ->withoutOverlapping();
+        $schedule->command('bookings:expire-pending')
+            ->hourly()
+            ->timezone('Asia/Jakarta')
+            ->withoutOverlapping();
     }
 
     /**

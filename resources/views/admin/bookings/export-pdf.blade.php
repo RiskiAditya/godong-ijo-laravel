@@ -405,7 +405,7 @@
                         </td>
                         <td>
                             <div class="date-text">
-                                {{ $booking->pembayaran->metode_pembayaran ?? '-' }}
+                                {{ $booking->pembayaran->payment_type ?? '-' }}
                             </div>
                         </td>
                         <td>

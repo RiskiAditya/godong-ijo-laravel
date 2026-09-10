@@ -7,25 +7,6 @@ use App\Services\BreadcrumbService;
 use App\Services\SEOService;
 use Illuminate\View\View;
 
-/**
- * DestinationController
- * 
- * Handles destination page requests for The Waterfall, Monster Fish, and Vertical Garden.
- * 
- * Requirements:
- * - 3.1: Routes for three destination pages with SEO URLs
- * - 3.2: Hero section with destination name, tagline, and featured image
- * - 3.3: Content section with description text
- * - 3.4: Image gallery section with minimum 4 photos
- * - 3.5: Facility information (operating hours, admission fees, amenities)
- * - 3.6: Booking CTA button linking to booking modal
- * - 3.7: Breadcrumb navigation showing Home > Destinasi > [Destination Name]
- * - 3.8: Consistent template structure
- * - 14.1: Load corresponding view within 500ms
- * - 14.2: Display 404 error page for invalid slugs
- * - 14.3: Pass page-specific data to views
- * - 14.7: Update page URL and browser history correctly
- */
 class DestinationController extends Controller
 {
     /**

@@ -17,7 +17,7 @@ Jumlah Orang      : {{ $pemesanan->jumlah_orang }} orang
 Metode Pembayaran : {{ strtoupper($pembayaran->payment_type ?? 'N/A') }}
 
 -------------------------------------------------
-TOTAL PEMBAYARAN  : Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}
+TOTAL PEMBAYARAN  : {{ $pemesanan->total_harga !== null ? 'Rp ' . number_format($pemesanan->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}
 -------------------------------------------------
 
 =================================================

@@ -271,21 +271,27 @@ class EmailService implements IEmailService
             'payment_success' => ['email', 'kode_booking', 'nama_lengkap', 'total_harga', 'pembayaran'],
             'cancellation' => ['email', 'kode_booking', 'nama_lengkap'],
         ];
-        
+
         $required = $requiredFields[$emailType] ?? [];
+        $isKiloan = ($pemesanan->package_specific_data['jenis_pemancingan'] ?? null) === 'kiloan';
+
+        if ($isKiloan && $emailType === 'booking_confirmation') {
+            $required = array_values(array_filter($required, fn ($field) => $field !== 'total_harga'));
+        }
+
         $missing = [];
-        
+
         foreach ($required as $field) {
             if ($field === 'pembayaran') {
-                if (!$pemesanan->pembayaran) {
+                if (! $pemesanan->pembayaran) {
                     $missing[] = $field;
                 }
             } elseif (empty($pemesanan->$field)) {
                 $missing[] = $field;
             }
         }
-        
-        if (!empty($missing)) {
+
+        if (! empty($missing)) {
             throw new EmailValidationException(
                 'Missing required template data: ' . implode(', ', $missing),
                 [

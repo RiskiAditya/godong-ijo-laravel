@@ -9,7 +9,8 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/modules/trust-badges.js',
                 'resources/css/admin.css',
-                'resources/js/admin.js'
+                'resources/js/admin.js',
+                'resources/js/admin-pages.js'
             ],
             refresh: true,
         }),

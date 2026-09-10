@@ -6,14 +6,6 @@ use App\Models\PaketWisata;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 
-/**
- * SitemapController
- * 
- * Generates XML sitemap for SEO optimization.
- * 
- * Requirements:
- * - 7.8: Generate sitemap.xml with all public pages
- */
 class SitemapController extends Controller
 {
     /**

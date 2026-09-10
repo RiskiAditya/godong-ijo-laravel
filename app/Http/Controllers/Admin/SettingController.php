@@ -18,9 +18,9 @@ class SettingController extends Controller
         $admin = Auth::guard('admin')->user();
         
         $settings = [
-            'site_name' => 'Godong Ijo',
-            'contact_email' => config('mail.from.address'),
-            'contact_phone' => '+62 123 4567 890',
+            'site_name' => SystemSetting::value('site_name', 'Godong Ijo'),
+            'contact_email' => SystemSetting::value('contact_email', config('mail.from.address')),
+            'contact_phone' => SystemSetting::value('contact_phone', '+62 123 4567 890'),
             'booking_notification' => SystemSetting::enabled('booking_notification'),
             'email_notification' => SystemSetting::enabled('email_notification'),
         ];
@@ -79,6 +79,9 @@ class SettingController extends Controller
                 'contact_phone' => 'required|string|max:30',
             ]);
 
+            SystemSetting::put('site_name', $request->string('site_name')->toString());
+            SystemSetting::put('contact_email', $request->string('contact_email')->toString());
+            SystemSetting::put('contact_phone', $request->string('contact_phone')->toString());
             SystemSetting::set('booking_notification', $request->boolean('booking_notification'));
             SystemSetting::set('email_notification', $request->boolean('email_notification'));
 

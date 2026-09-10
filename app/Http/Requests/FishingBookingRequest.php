@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Support\FishingTypeCatalog;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ class FishingBookingRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -32,13 +33,13 @@ class FishingBookingRequest extends FormRequest
                 'string',
                 'regex:/^(08|62)[0-9]{8,13}$/',
                 'min:10',
-                'max:15'
+                'max:15',
             ],
             'tanggal_kunjungan' => [
                 'required',
                 'date',
                 'after_or_equal:today',
-                'before_or_equal:' . now()->addDays(365)->format('Y-m-d')
+                'before_or_equal:'.now()->addDays(365)->format('Y-m-d'),
             ],
             'jam_kunjungan' => [
                 'required',
@@ -52,12 +53,12 @@ class FishingBookingRequest extends FormRequest
             ],
             'jenis_pemancingan' => [
                 'required',
-                Rule::in(FishingTypeCatalog::DIRECT_TYPES)
+                Rule::in(FishingTypeCatalog::DIRECT_TYPES),
             ],
-            'jumlah_joran' => ['required', 'integer', 'min:1'],
+            'jumlah_joran' => ['required', 'integer', 'min:1', 'max:999'],
             'perlu_sewa_alat' => ['nullable', 'boolean'],
             'setuju_aturan' => ['required', 'accepted'],
-            
+
             // Optional fields
             'qty_komet' => ['nullable', 'integer', 'min:0'],
             'qty_umpan_jadi' => ['nullable', 'integer', 'min:0'],
@@ -122,6 +123,7 @@ class FishingBookingRequest extends FormRequest
             'jumlah_joran.required' => 'Jumlah joran wajib diisi',
             'jumlah_joran.integer' => 'Jumlah joran harus berupa angka',
             'jumlah_joran.min' => 'Jumlah joran minimal 1',
+            'jumlah_joran.max' => 'Jumlah joran maksimal 999',
 
             'durasi.required' => 'Durasi wajib dipilih',
             'durasi.in' => 'Durasi tidak valid',
@@ -159,14 +161,14 @@ class FishingBookingRequest extends FormRequest
         if ($this->has('no_hp')) {
             $phone = trim($this->input('no_hp'));
             $phone = preg_replace('/[^0-9+]/', '', $phone);
-            
+
             // Convert to standard format (62xxx)
             if (preg_match('/^0/', $phone)) {
-                $phone = '62' . substr($phone, 1);
+                $phone = '62'.substr($phone, 1);
             } elseif (preg_match('/^\+62/', $phone)) {
                 $phone = substr($phone, 1);
             }
-            
+
             $sanitized['no_hp'] = $phone;
         }
 

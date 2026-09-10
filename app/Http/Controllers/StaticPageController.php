@@ -8,20 +8,6 @@ use App\Services\SEOService;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
 
-/**
- * StaticPageController
- * 
- * Handles static page requests for education, about, and contact pages.
- * 
- * Requirements:
- * - 5.1: Create routes for three static pages with SEO URLs
- * - 5.2: Wisata Edukasi page structure
- * - 5.3: Tentang Kami page structure
- * - 5.4: Kontak page structure
- * - 14.1: Integrate NavigationService, BreadcrumbService, SEOService
- * - 14.3: Pass navigation data with dynamic packages to view
- * - 14.7: Generate page-specific SEO metadata
- */
 class StaticPageController extends Controller
 {
     /**

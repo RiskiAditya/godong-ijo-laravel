@@ -4,20 +4,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Route;
 
-/**
- * BreadcrumbService
- * 
- * Generates breadcrumb navigation for pages with structured data support.
- * 
- * Requirements:
- * - 3.7: Display breadcrumb navigation on destination pages
- * - 4.8: Display breadcrumb navigation on package pages
- * - 5.5: Display breadcrumb navigation on static pages
- * - 16.1: Display breadcrumb below navbar on all sub-pages
- * - 16.2: Format as "Home > [Parent] > [Current Page]"
- * - 16.3: Make parent levels clickable, current page as plain text
- * - 16.5: Include BreadcrumbList structured data markup
- */
 class BreadcrumbService
 {
     /**

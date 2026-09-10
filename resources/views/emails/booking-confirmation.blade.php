@@ -82,7 +82,7 @@
                                             <tr>
                                                 <td style="padding: 12px 0 0 0; font-size: 16px; color: #111827; font-weight: bold;">Total Pembayaran</td>
                                                 <td style="padding: 12px 0 0 0; font-size: 18px; color: #667eea; font-weight: bold; text-align: right;">
-                                                    Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}
+                                                    {{ $pemesanan->total_harga !== null ? 'Rp ' . number_format($pemesanan->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}
                                                 </td>
                                             </tr>
                                         </table>

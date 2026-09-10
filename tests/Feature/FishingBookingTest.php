@@ -30,7 +30,7 @@ class FishingBookingTest extends TestCase
 
     public function test_fishing_booking_validation_rejects_invalid_time_and_missing_agreement(): void
     {
-        $response = $this->postJson('/booking/fishing', [
+        $response = $this->postJson('/api/booking/fishing', [
             'nama_lengkap' => 'Budi',
             'email' => 'budi@example.com',
             'no_hp' => '081234567890',
@@ -49,7 +49,7 @@ class FishingBookingTest extends TestCase
 
     public function test_fishing_booking_can_be_saved_for_kiloan_with_null_estimate(): void
     {
-        $response = $this->postJson('/booking/fishing', [
+        $response = $this->postJson('/api/booking/fishing', [
             'nama_lengkap' => 'Sinta',
             'email' => 'sinta@example.com',
             'no_hp' => '081234567891',

@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 
 class PaymentSuccessMail extends Mailable
 {
-    use Queueable, SerializesModels, HasBookingMessageId;
+    use HasBookingMessageId, Queueable, SerializesModels;
 
     public $pemesanan;
 
@@ -27,20 +27,20 @@ class PaymentSuccessMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pembayaran Berhasil - E-Ticket ' . $this->pemesanan->kode_booking)
-                    ->view('emails.payment-success')
-                    ->text('emails.payment-success-text')
-                    ->with([
-                        'pemesanan' => $this->pemesanan,
-                        'pembayaran' => $this->pemesanan->pembayaran,
-                        'paket' => $this->pemesanan->jadwal->paket,
-                    ])
-                    ->withHeaders([
-                        'X-Priority' => '1',
-                        'Precedence' => 'bulk',
-                        'Auto-Submitted' => 'auto-generated',
-                        'X-Mailer' => 'Laravel/' . app()->version(),
-                        'Message-ID' => $this->generateMessageId(),
-                    ]);
+        return $this->subject('Pembayaran Berhasil - E-Ticket '.$this->pemesanan->kode_booking)
+            ->view('emails.payment-success')
+            ->text('emails.payment-success-text')
+            ->with([
+                'pemesanan' => $this->pemesanan,
+                'pembayaran' => $this->pemesanan->pembayaran,
+                'paket' => $this->pemesanan->paketWisata ?? $this->pemesanan->jadwal?->paket,
+            ])
+            ->withHeaders([
+                'X-Priority' => '1',
+                'Precedence' => 'bulk',
+                'Auto-Submitted' => 'auto-generated',
+                'X-Mailer' => 'Laravel/'.app()->version(),
+                'Message-ID' => $this->generateMessageId(),
+            ]);
     }
 }

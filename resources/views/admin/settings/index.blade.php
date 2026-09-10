@@ -415,21 +415,21 @@
     <div>
         <!-- Navigation Tabs -->
         <div class="settings-nav">
-            <button class="settings-nav-item active" onclick="switchTab('profile')">
+            <button class="settings-nav-item active" data-settings-tab="profile">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 6px;">
                     <circle cx="9" cy="8" r="4"/>
                     <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
                 </svg>
                 Profil
             </button>
-            <button class="settings-nav-item" onclick="switchTab('security')">
+            <button class="settings-nav-item" data-settings-tab="security">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 6px;">
                     <rect x="3" y="11" width="18" height="11" rx="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
                 Keamanan
             </button>
-            <button class="settings-nav-item" onclick="switchTab('system')">
+            <button class="settings-nav-item" data-settings-tab="system">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 6px;">
                     <circle cx="12" cy="12" r="3"/>
                     <path d="M12 1v6m0 6v6M5.6 5.6l4.2 4.2m4.4 4.4l4.2 4.2M1 12h6m6 0h6M5.6 18.4l4.2-4.2m4.4-4.4l4.2-4.2"/>
@@ -507,7 +507,7 @@
                             <label class="form-label form-label-required">Password Lama</label>
                             <div class="password-field">
                                 <input type="password" name="current_password" class="form-input" required>
-                                <button type="button" class="password-toggle" aria-label="Tampilkan password lama" title="Tampilkan password" onclick="togglePassword(this)">
+                                <button type="button" class="password-toggle" aria-label="Tampilkan password lama" title="Tampilkan password">
                                     <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                         <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
                                         <circle cx="12" cy="12" r="2.5"/>
@@ -523,7 +523,7 @@
                             <label class="form-label form-label-required">Password Baru</label>
                             <div class="password-field">
                                 <input type="password" name="new_password" class="form-input" required minlength="6">
-                                <button type="button" class="password-toggle" aria-label="Tampilkan password baru" title="Tampilkan password" onclick="togglePassword(this)">
+                                <button type="button" class="password-toggle" aria-label="Tampilkan password baru" title="Tampilkan password">
                                     <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                         <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
                                         <circle cx="12" cy="12" r="2.5"/>
@@ -540,7 +540,7 @@
                             <label class="form-label form-label-required">Konfirmasi Password Baru</label>
                             <div class="password-field">
                                 <input type="password" name="new_password_confirmation" class="form-input" required minlength="6">
-                                <button type="button" class="password-toggle" aria-label="Tampilkan konfirmasi password" title="Tampilkan password" onclick="togglePassword(this)">
+                                <button type="button" class="password-toggle" aria-label="Tampilkan konfirmasi password" title="Tampilkan password">
                                     <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                         <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
                                         <circle cx="12" cy="12" r="2.5"/>
@@ -736,36 +736,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function togglePassword(button) {
-    const input = button.parentElement.querySelector('input');
-    const isVisible = input.type === 'text';
-    input.type = isVisible ? 'password' : 'text';
-    button.setAttribute('aria-label', isVisible ? 'Tampilkan password' : 'Sembunyikan password');
-    button.setAttribute('title', isVisible ? 'Tampilkan password' : 'Sembunyikan password');
-    button.innerHTML = isVisible
-        ? '<svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>'
-        : '<svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.2 3.9M6.3 6.3C3.6 8.2 2 12 2 12s3.5 7 10 7a10 10 0 0 0 3.2-.5"/><path d="M9.9 9.9a3 3 0 1 0 4.2 4.2"/></svg>';
-}
-
-function switchTab(tabName) {
-    // Hide all sections
-    document.querySelectorAll('.settings-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Remove active from all nav items
-    document.querySelectorAll('.settings-nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Show selected section
-    document.getElementById(tabName + '-section').classList.add('active');
-    
-    // Set active nav item
-    event.target.closest('.settings-nav-item').classList.add('active');
-}
-</script>
-@endpush
 @endsection

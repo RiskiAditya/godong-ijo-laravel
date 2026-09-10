@@ -28,13 +28,13 @@ class NotificationService
                 'admin_id' => null, // Broadcast to all admins
                 'type' => 'booking',
                 'title' => 'Booking Baru Masuk',
-                'message' => "Booking baru dari {$booking->nama_pemesan} untuk paket {$paketName}",
+                'message' => "Booking baru dari {$booking->nama_lengkap} untuk paket {$paketName}",
                 'data' => [
                     'booking_code' => $booking->kode_booking,
-                    'customer_name' => $booking->nama_pemesan,
+                    'customer_name' => $booking->nama_lengkap,
                     'package_name' => $paketName,
                     'total_price' => $booking->total_harga,
-                    'booking_date' => $booking->tanggal_berkunjung,
+                    'booking_date' => $booking->tanggal_kunjungan,
                 ],
                 'booking_id' => $booking->id,
                 'is_read' => false,
@@ -70,10 +70,10 @@ class NotificationService
                 'message' => "Pembayaran untuk booking {$booking->kode_booking} telah dikonfirmasi",
                 'data' => [
                     'booking_code' => $booking->kode_booking,
-                    'customer_name' => $booking->nama_pemesan,
+                    'customer_name' => $booking->nama_lengkap,
                     'package_name' => $paketName,
                     'total_price' => $booking->total_harga,
-                    'payment_method' => $booking->pembayaran->metode_pembayaran ?? 'N/A',
+                    'payment_method' => $booking->pembayaran->payment_type ?? 'N/A',
                 ],
                 'booking_id' => $booking->id,
                 'is_read' => false,
@@ -110,7 +110,7 @@ class NotificationService
                 'message' => "Booking {$booking->kode_booking} telah dibatalkan" . ($reason ? ": {$reason}" : ''),
                 'data' => [
                     'booking_code' => $booking->kode_booking,
-                    'customer_name' => $booking->nama_pemesan,
+                    'customer_name' => $booking->nama_lengkap,
                     'package_name' => $paketName,
                     'cancellation_reason' => $reason,
                 ],

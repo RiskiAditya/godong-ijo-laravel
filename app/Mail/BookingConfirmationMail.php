@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 
 class BookingConfirmationMail extends Mailable
 {
-    use Queueable, SerializesModels, HasBookingMessageId;
+    use HasBookingMessageId, Queueable, SerializesModels;
 
     public $pemesanan;
 
@@ -27,20 +27,20 @@ class BookingConfirmationMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Konfirmasi Booking - ' . $this->pemesanan->kode_booking)
-                    ->view('emails.booking-confirmation')
-                    ->text('emails.booking-confirmation-text')
-                    ->with([
-                        'pemesanan' => $this->pemesanan,
-                        'paket' => $this->pemesanan->paketWisata ?? $this->pemesanan->jadwal->paket,
-                        'jadwal' => $this->pemesanan->jadwal,
-                    ])
-                    ->withHeaders([
-                        'X-Priority' => '3',
-                        'X-Mailer' => 'Laravel/' . app()->version(),
-                        'Precedence' => 'bulk',
-                        'Auto-Submitted' => 'auto-generated',
-                        'Message-ID' => $this->generateMessageId(),
-                    ]);
+        return $this->subject('Konfirmasi Booking - '.$this->pemesanan->kode_booking)
+            ->view('emails.booking-confirmation')
+            ->text('emails.booking-confirmation-text')
+            ->with([
+                'pemesanan' => $this->pemesanan,
+                'paket' => $this->pemesanan->paketWisata ?? $this->pemesanan->jadwal?->paket,
+                'jadwal' => $this->pemesanan->jadwal,
+            ])
+            ->withHeaders([
+                'X-Priority' => '3',
+                'X-Mailer' => 'Laravel/'.app()->version(),
+                'Precedence' => 'bulk',
+                'Auto-Submitted' => 'auto-generated',
+                'Message-ID' => $this->generateMessageId(),
+            ]);
     }
 }

@@ -2,12 +2,17 @@
 
 namespace Tests\Unit;
 
+use App\Models\PaketWisata;
+use App\Models\Pemesanan;
+use App\Models\Pembayaran;
+use App\Services\AdminBookingService;
 use App\Services\EmailService;
 use App\Services\RateLimitStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use ReflectionMethod;
 use Tests\TestCase;
 
 /**
@@ -196,6 +201,78 @@ class EmailServiceRateLimitTest extends TestCase
         $this->assertEquals(45.0, $status->usagePercentage, 'Usage percentage should be 45%');
         $this->assertTrue($status->canSend, 'Should be able to send');
         $this->assertFalse($status->warningThreshold, 'Should not be at warning threshold');
+    }
+
+    public function test_kiloan_booking_email_validation_does_not_require_total_harga()
+    {
+        $booking = new Pemesanan([
+            'email' => 'sinta@example.com',
+            'kode_booking' => 'GOD-20260909-ABC123',
+            'nama_lengkap' => 'Sinta',
+            'total_harga' => null,
+            'package_specific_data' => [
+                'jenis_pemancingan' => 'kiloan',
+            ],
+        ]);
+
+        $method = new ReflectionMethod(EmailService::class, 'validateTemplateData');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($this->emailService, $booking, 'booking_confirmation');
+            $this->assertTrue(true);
+        } catch (\Throwable $e) {
+            $this->fail('Kiloan booking should not require total_harga for booking confirmation validation. '.$e->getMessage());
+        }
+    }
+
+    public function test_kiloan_finalization_service_captures_price_and_updates_payment_gross_amount()
+    {
+        $paket = PaketWisata::create([
+            'nama_paket' => 'Paket Uji Kiloan',
+            'slug' => 'paket-uji-kiloan',
+            'deskripsi' => 'Fixture package',
+            'harga' => 150000,
+            'kuota' => 20,
+            'is_active' => true,
+        ]);
+
+        $booking = Pemesanan::create([
+            'paket_wisata_id' => $paket->id,
+            'kode_booking' => 'BK-TEST-KILOAN-001',
+            'email' => 'sinta@example.com',
+            'nama_lengkap' => 'Sinta',
+            'no_hp' => '081234567890',
+            'jumlah_orang' => 1,
+            'status' => 'pending',
+            'total_harga' => null,
+            'package_specific_data' => [
+                'jenis_pemancingan' => 'kiloan',
+            ],
+        ]);
+
+        $booking->pembayaran()->create([
+            'order_id' => 'ORDER-001',
+            'transaction_id' => 'TRANS-001',
+            'payment_type' => 'bank_transfer',
+            'gross_amount' => 0,
+            'status' => 'pending',
+        ]);
+
+        $service = new AdminBookingService($this->emailService);
+        $service->finalizeKiloan($booking, [
+            'total_harga' => 125000,
+            'berat_kg' => 3.2,
+            'hasil_timbangan' => 'Timbang 3.2kg',
+        ]);
+
+        $booking->refresh();
+        $booking->load('pembayaran');
+
+        $this->assertSame(125000.0, (float) $booking->total_harga);
+        $this->assertSame(3.2, (float) data_get($booking->package_specific_data, 'berat_kg'));
+        $this->assertSame('Timbang 3.2kg', data_get($booking->package_specific_data, 'hasil_timbangan'));
+        $this->assertSame(125000.0, (float) $booking->pembayaran->gross_amount);
     }
 
     /**

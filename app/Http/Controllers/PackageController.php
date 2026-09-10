@@ -9,25 +9,6 @@ use App\Services\SEOService;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/**
- * PackageController
- * 
- * Handles tour package page requests with database integration.
- * 
- * Requirements:
- * - 4.1: Route for package pages with SEO URLs
- * - 4.2: Hero section with package name, tagline, featured image
- * - 4.3: Display package highlights
- * - 4.4: Display pricing information
- * - 4.5: Display itinerary section
- * - 4.6: Display included/excluded lists
- * - 4.9: Load content dynamically from paket_wisata table
- * - 14.1: Load page within 500ms
- * - 14.3: Pass page-specific data via controller
- * - 14.4: Fetch package data from database
- * - 14.5: Handle missing packages gracefully
- * - 14.7: Update URL and browser history
- */
 class PackageController extends Controller
 {
     /**

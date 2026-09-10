@@ -6,19 +6,6 @@ use App\Models\PaketWisata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
-/**
- * NavigationService
- * 
- * Builds navigation structure and determines active states for the multi-page navigation system.
- * 
- * Requirements:
- * - 1.7: Active state detection for current page
- * - 8.1: Display active state indicator on current menu item
- * - 8.2: Highlight parent and child for destination pages
- * - 8.3: Highlight parent and child for package pages
- * - 11.3: Automatically determine active state based on current route
- * - 18.4: Load dynamic package items from database
- */
 class NavigationService
 {
     /**

@@ -90,12 +90,48 @@
                     <tr style="border-top: 2px solid var(--line);">
                         <td style="padding: 14px 0 10px; color: var(--ink); font-size: 13.5px; font-weight: 700;">Total Harga</td>
                         <td style="padding: 14px 0 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 18px; color: var(--brand);">
-                            Rp {{ number_format($booking->total_harga, 0, ',', '.') }}
+                            {{ $booking->total_harga !== null ? 'Rp ' . number_format($booking->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}
                         </td>
                     </tr>
                 </table>
             </div>
         </div>
+
+        @if(($booking->package_specific_data['jenis_pemancingan'] ?? null) === 'kiloan')
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Finalisasi Harga Kiloan</h2>
+                    <div style="margin-top: 4px; font-size: 11.5px; color: var(--ink-45);">
+                        Masukkan hasil timbangan dan harga final setelah ikan ditimbang.
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 20px 18px;">
+                <form method="POST" action="{{ route('admin.bookings.finalize-kiloan', $booking) }}">
+                    @csrf
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+                        <div class="form-group" style="margin: 0;">
+                            <label for="berat_kg">Berat Ikan (kg)</label>
+                            <input type="number" name="berat_kg" min="0" step="0.01" value="{{ data_get($booking->package_specific_data, 'berat_kg') ?? '' }}">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="hasil_timbangan">Hasil Timbangan</label>
+                            <input type="text" name="hasil_timbangan" value="{{ data_get($booking->package_specific_data, 'hasil_timbangan') ?? '' }}" placeholder="Jenis/hasil timbangan">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="total_harga">Harga Final (Rp)</label>
+                            <input type="number" name="total_harga" min="0" step="1000" value="{{ $booking->total_harga ?? '' }}">
+                        </div>
+                    </div>
+                    <div style="margin-top: 14px;">
+                        <button type="submit" class="btn-solid">Simpan Harga Final</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
 
         <!-- Customer Info -->
         <div class="panel">

@@ -10,10 +10,12 @@ use Illuminate\Queue\SerializesModels;
 
 class CancellationNotificationMail extends Mailable
 {
-    use Queueable, SerializesModels, HasBookingMessageId;
+    use HasBookingMessageId, Queueable, SerializesModels;
 
     public $pemesanan;
+
     public $reason;
+
     public $refundInfo;
 
     /**
@@ -31,21 +33,21 @@ class CancellationNotificationMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pembatalan Booking - ' . $this->pemesanan->kode_booking)
-                    ->view('emails.cancellation-notification')
-                    ->text('emails.cancellation-notification-text')
-                    ->with([
-                        'pemesanan' => $this->pemesanan,
-                        'paket' => $this->pemesanan->jadwal->paket ?? $this->pemesanan->paketWisata,
-                        'reason' => $this->reason,
-                        'refundInfo' => $this->refundInfo,
-                    ])
-                    ->withHeaders([
-                        'X-Priority' => '3',
-                        'X-Mailer' => 'Laravel/' . app()->version(),
-                        'Precedence' => 'bulk',
-                        'Auto-Submitted' => 'auto-generated',
-                        'Message-ID' => $this->generateMessageId(),
-                    ]);
+        return $this->subject('Pembatalan Booking - '.$this->pemesanan->kode_booking)
+            ->view('emails.cancellation-notification')
+            ->text('emails.cancellation-notification-text')
+            ->with([
+                'pemesanan' => $this->pemesanan,
+                'paket' => $this->pemesanan->jadwal?->paket ?? $this->pemesanan->paketWisata,
+                'reason' => $this->reason,
+                'refundInfo' => $this->refundInfo,
+            ])
+            ->withHeaders([
+                'X-Priority' => '3',
+                'X-Mailer' => 'Laravel/'.app()->version(),
+                'Precedence' => 'bulk',
+                'Auto-Submitted' => 'auto-generated',
+                'Message-ID' => $this->generateMessageId(),
+            ]);
     }
 }

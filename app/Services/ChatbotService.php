@@ -2,16 +2,77 @@
 
 namespace App\Services;
 
-use App\Models\PaketWisata;
-use App\Models\Pemesanan;
 use App\Models\AdminNotification;
 use App\Models\Jadwal;
+use App\Models\PaketWisata;
+use App\Models\Pemesanan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ChatbotService
 {
+    private const GREETING_KEYWORDS = ['halo', 'hai', 'hello', 'pagi', 'siang', 'sore', 'malam'];
+
+    private const ADMIN_BOOKING_SEARCH_KEYWORDS = [
+        'cari booking',
+        'search booking',
+        'temukan booking',
+        'cari pemesanan',
+        'booking atas nama',
+    ];
+
+    private const ADMIN_LOW_STOCK_KEYWORDS = [
+        'paket hampir penuh',
+        'kuota hampir penuh',
+        'kuota menipis',
+        'hampir habis',
+        'hampir penuh',
+    ];
+
+    private const ADMIN_HELP_KEYWORDS = [
+        'bantuan',
+        'help',
+        'fitur admin',
+        'menu admin',
+        'bisa apa',
+        'cara pakai',
+        'cari booking',
+    ];
+
+    private const ADMIN_FEATURE_KEYWORDS = [
+        'pelanggan',
+        'customer',
+        'paket aktif',
+        'paket tersedia',
+        'aktivitas terbaru',
+        'notifikasi',
+        'belum dibaca',
+        'pengaturan',
+    ];
+
+    private const ADMIN_SUMMARY_KEYWORDS = [
+        'ringkasan',
+        'summary',
+        'pendapatan',
+        'omzet',
+        'ramai',
+        'terlaris',
+        'booking hari ini',
+        'booking bulan',
+        'pending',
+        'status booking',
+        'laporan',
+        'dashboard',
+        'performa',
+        'statistik',
+    ];
+
+    private const PRICE_KEYWORDS = ['harga', 'price', 'biaya', 'tarif', 'paket'];
+    private const OPENING_KEYWORDS = ['jam', 'buka', 'operasional', 'tutup'];
+    private const LOCATION_KEYWORDS = ['lokasi', 'alamat', 'dimana', 'maps', 'depok'];
+    private const BOOKING_KEYWORDS = ['booking', 'pesan', 'reservasi', 'kunjungan'];
+
     /**
      * Return a helpful answer using the live package catalog and common FAQs.
      */
@@ -24,92 +85,60 @@ class ChatbotService
             return $this->response('Tulis pertanyaanmu dulu ya. Aku bisa bantu soal paket, harga, jam buka, lokasi, dan booking.');
         }
 
-        if ($this->containsAny($normalized, ['halo', 'hai', 'hello', 'pagi', 'siang', 'sore', 'malam'])) {
-            $greeting = $audience === 'admin'
-                ? 'Halo Admin. Aku bisa bantu membaca ringkasan paket dan memberi panduan singkat operasional booking.'
-                : 'Halo. Aku bisa bantu cari info paket, harga, jam buka, lokasi, dan cara booking Godong Ijo.';
-
-            return $this->response($greeting, ['quick_replies' => $this->quickReplies($audience)]);
-        }
-
-        if ($audience === 'admin' && preg_match('/\b(BK-[A-Z0-9-]+)\b/i', $message, $matches)) {
-            return $this->response($this->bookingLookup(strtoupper($matches[1])), [
+        if ($this->containsAny($normalized, self::GREETING_KEYWORDS)) {
+            return $this->response($this->greetingText($audience), [
                 'quick_replies' => $this->quickReplies($audience),
             ]);
         }
 
-        if ($audience === 'admin' && $this->containsAny($normalized, [
-            'cari booking', 'search booking', 'temukan booking', 'cari pemesanan', 'booking atas nama',
-        ])) {
+        if ($audience === 'admin' && $this->extractBookingCode($message) !== null) {
+            $bookingCode = $this->extractBookingCode($message);
+
+            return $this->response($this->bookingLookup($bookingCode), [
+                'quick_replies' => $this->quickReplies($audience),
+            ]);
+        }
+
+        if ($audience === 'admin' && $this->containsAny($normalized, self::ADMIN_BOOKING_SEARCH_KEYWORDS)) {
             return $this->response($this->adminBookingSearch($message), [
                 'quick_replies' => $this->quickReplies($audience),
             ]);
         }
 
-        if ($audience === 'admin' && $this->containsAny($normalized, [
-            'paket hampir penuh', 'kuota hampir penuh', 'kuota menipis', 'hampir habis', 'hampir penuh',
-        ])) {
+        if ($audience === 'admin' && $this->containsAny($normalized, self::ADMIN_LOW_STOCK_KEYWORDS)) {
             return $this->response($this->lowQuotaPackages(), [
                 'quick_replies' => $this->quickReplies($audience),
             ]);
         }
 
-        if ($audience === 'admin' && $this->containsAny($normalized, [
-            'bantuan', 'help', 'fitur admin', 'menu admin', 'bisa apa', 'cara pakai', 'cari booking',
-        ])) {
+        if ($audience === 'admin' && $this->containsAny($normalized, self::ADMIN_HELP_KEYWORDS)) {
             return $this->response($this->adminHelp(), [
                 'quick_replies' => $this->quickReplies($audience),
             ]);
         }
 
-        if ($audience === 'admin' && $this->containsAny($normalized, [
-            'pelanggan', 'customer', 'paket aktif', 'paket tersedia', 'aktivitas terbaru',
-            'notifikasi', 'belum dibaca', 'pengaturan',
-        ])) {
+        if ($audience === 'admin' && $this->containsAny($normalized, self::ADMIN_FEATURE_KEYWORDS)) {
             return $this->adminFeatureSummary($normalized);
         }
 
-        if ($audience === 'admin' && $this->containsAny($normalized, [
-            'ringkasan', 'summary', 'pendapatan', 'omzet', 'ramai', 'terlaris',
-            'booking hari ini', 'booking bulan', 'pending', 'status booking',
-            'laporan', 'dashboard', 'performa', 'statistik',
-        ])) {
+        if ($audience === 'admin' && $this->containsAny($normalized, self::ADMIN_SUMMARY_KEYWORDS)) {
             return $this->response($this->adminSummary($normalized), [
                 'quick_replies' => $this->quickReplies($audience),
             ]);
         }
 
-        if ($this->containsAny($normalized, ['harga', 'price', 'biaya', 'tarif', 'paket'])) {
-            $packages = PaketWisata::query()
-                ->where('is_active', true)
-                ->orderBy('nama_paket')
-                ->get(['nama_paket', 'harga', 'diskon_persen', 'jenis_paket']);
-
-            if ($packages->isNotEmpty()) {
-                $lines = $packages->map(function (PaketWisata $package) {
-                    $price = $package->harga > 0
-                        ? 'Rp ' . number_format($package->final_price, 0, ',', '.')
-                        : 'Hubungi kami';
-                    $discount = $package->diskon_persen > 0 ? ' (diskon ' . $package->diskon_persen . '%)' : '';
-                    return '- ' . $package->nama_paket . ': ' . $price . $discount;
-                })->implode("\n");
-
-                return $this->response("Berikut paket yang tersedia saat ini:\n{$lines}\n\nHarga dapat berubah mengikuti ketersediaan dan periode kunjungan.");
+        if ($this->containsAny($normalized, self::PRICE_KEYWORDS)) {
+            $catalogResponse = $this->packageCatalogResponse();
+            if ($catalogResponse !== null) {
+                return $catalogResponse;
             }
         }
 
-        if ($this->containsAny($normalized, ['jam', 'buka', 'operasional', 'tutup'])) {
+        if ($this->containsAny($normalized, self::OPENING_KEYWORDS)) {
             return $this->response('Godong Ijo buka setiap hari. The Waterfall Resto beroperasi pukul 10.00-21.00, sedangkan Fishing Lake pukul 09.00-21.00.');
         }
 
-        if ($this->containsAny($normalized, [
-            'booking private room',
-            'pesan private room',
-            'reservasi private room',
-            'private room gimana',
-            'private room bagaimana',
-            'cara booking private',
-        ])) {
+        if ($this->containsAny($normalized, ['booking private room', 'pesan private room', 'reservasi private room', 'private room gimana', 'private room bagaimana', 'cara booking private'])) {
             return $this->response(
                 "Cara booking Private Room:\n"
                 . "1. Buka halaman Paket Private Room: " . route('packages.category', 'private-room') . "\n"
@@ -121,11 +150,11 @@ class ChatbotService
             );
         }
 
-        if ($this->containsAny($normalized, ['lokasi', 'alamat', 'dimana', 'maps', 'depok'])) {
+        if ($this->containsAny($normalized, self::LOCATION_KEYWORDS)) {
             return $this->response('Lokasi Godong Ijo: Jalan Cinangka Raya Km 10 No. 60, Serua, Bojongsari, Kota Depok, Jawa Barat 16517.');
         }
 
-        if ($this->containsAny($normalized, ['booking', 'pesan', 'reservasi', 'kunjungan'])) {
+        if ($this->containsAny($normalized, self::BOOKING_KEYWORDS)) {
             return $this->response('Untuk booking, pilih paket di halaman utama lalu klik Pesan. Siapkan nama, nomor WhatsApp, tanggal kunjungan, dan jumlah orang.');
         }
 
@@ -149,10 +178,17 @@ class ChatbotService
         ], $meta);
     }
 
-    private function quickReplies(string $audience): array
+    private function greetingText(string $audience): string
     {
         return $audience === 'admin'
-            ? [
+            ? 'Halo Admin. Aku bisa bantu membaca ringkasan paket dan memberi panduan singkat operasional booking.'
+            : 'Halo. Aku bisa bantu cari info paket, harga, jam buka, lokasi, dan cara booking Godong Ijo.';
+    }
+
+    private function quickReplies(string $audience): array
+    {
+        if ($audience === 'admin') {
+            return [
                 'Bantuan fitur admin',
                 'Cari booking',
                 'Berapa booking pending?',
@@ -163,8 +199,42 @@ class ChatbotService
                 'Aktivitas terbaru apa saja?',
                 'Ringkasan pendapatan dan booking',
                 'Cara cari booking berdasarkan kode',
-            ]
-            : ['Lihat harga paket', 'Jam buka', 'Cara booking'];
+            ];
+        }
+
+        return ['Lihat harga paket', 'Jam buka', 'Cara booking'];
+    }
+
+    private function extractBookingCode(string $message): ?string
+    {
+        if (! preg_match('/\b(BK-[A-Z0-9-]+)\b/i', $message, $matches)) {
+            return null;
+        }
+
+        return strtoupper($matches[1]);
+    }
+
+    private function packageCatalogResponse(): ?array
+    {
+        $packages = PaketWisata::query()
+            ->where('is_active', true)
+            ->orderBy('nama_paket')
+            ->get(['nama_paket', 'harga', 'diskon_persen', 'jenis_paket']);
+
+        if ($packages->isEmpty()) {
+            return null;
+        }
+
+        $lines = $packages->map(function (PaketWisata $package) {
+            $price = $package->harga > 0
+                ? 'Rp ' . number_format($package->final_price, 0, ',', '.')
+                : 'Hubungi kami';
+            $discount = $package->diskon_persen > 0 ? ' (diskon ' . $package->diskon_persen . '%)' : '';
+
+            return '- ' . $package->nama_paket . ': ' . $price . $discount;
+        })->implode("\n");
+
+        return $this->response("Berikut paket yang tersedia saat ini:\n{$lines}\n\nHarga dapat berubah mengikuti ketersediaan dan periode kunjungan.");
     }
 
     private function adminHelp(): string
@@ -187,7 +257,7 @@ class ChatbotService
             ->where('kode_booking', $bookingCode)
             ->first();
 
-        if (!$booking) {
+        if (! $booking) {
             return "Booking {$bookingCode} tidak ditemukan di database saat ini.";
         }
 
@@ -232,6 +302,7 @@ class ChatbotService
         $lines = $bookings->map(function (Pemesanan $booking) {
             $package = $booking->paketWisata?->nama_paket ?? 'Paket tidak diketahui';
             $date = $booking->tanggal_kunjungan?->format('d/m/Y') ?? 'Belum ditentukan';
+
             return '- ' . $booking->kode_booking . ' | ' . $booking->nama_lengkap
                 . "\n  {$package} · {$date} · " . ucfirst((string) $booking->status);
         })->implode("\n");
@@ -281,6 +352,7 @@ class ChatbotService
     {
         if ($this->containsAny($question, ['pelanggan', 'customer'])) {
             $customers = Pemesanan::whereNotNull('email')->distinct()->count('email');
+
             return $this->response("Ada {$customers} pelanggan unik berdasarkan email booking. Detail pelanggan tersedia di menu Pelanggan.", [
                 'quick_replies' => $this->quickReplies('admin'),
             ]);
@@ -288,6 +360,7 @@ class ChatbotService
 
         if ($this->containsAny($question, ['paket aktif', 'paket tersedia'])) {
             $activePackages = PaketWisata::where('is_active', true)->count();
+
             return $this->response("Saat ini ada {$activePackages} paket aktif. Gunakan menu Paket Wisata untuk melihat, menambah, mengubah, atau menonaktifkan paket.", [
                 'quick_replies' => $this->quickReplies('admin'),
             ]);
@@ -295,6 +368,7 @@ class ChatbotService
 
         if ($this->containsAny($question, ['notifikasi', 'belum dibaca'])) {
             $unread = AdminNotification::where('is_read', false)->count();
+
             return $this->response("Ada {$unread} notifikasi admin yang belum dibaca. Buka ikon lonceng di topbar untuk melihat detailnya.", [
                 'quick_replies' => $this->quickReplies('admin'),
             ]);
@@ -303,6 +377,7 @@ class ChatbotService
         if ($this->containsAny($question, ['aktivitas terbaru'])) {
             $packages = PaketWisata::where('updated_at', '>=', now()->subDays(7))->count();
             $bookings = Pemesanan::where('created_at', '>=', now()->subDays(7))->count();
+
             return $this->response("Dalam 7 hari terakhir: {$bookings} booking baru dan {$packages} perubahan paket. Detail lengkap ada di menu Riwayat Aktivitas.", [
                 'quick_replies' => $this->quickReplies('admin'),
             ]);
