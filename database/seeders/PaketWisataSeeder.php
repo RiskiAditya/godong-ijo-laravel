@@ -28,7 +28,7 @@ Fasilitas:
                 'harga' => 75000,
                 'kuota' => 100,
                 'is_active' => true,
-                'foto' => 'images/placeholders/asset 3 (3).jpg',
+                'foto' => 'images/placeholders/asset 3.webp',
             ],
             [
                 'nama_paket' => 'Paket Sport Fishing',

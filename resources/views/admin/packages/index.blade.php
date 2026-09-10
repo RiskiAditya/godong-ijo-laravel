@@ -74,7 +74,7 @@
                 <tr>
                     <td>
                         @if($paket->foto)
-                            <img src="{{ asset($paket->foto) }}" alt="{{ $paket->nama_paket }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line);">
+                            <img src="{{ asset($paket->foto) }}" alt="{{ $paket->nama_paket }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line);" onerror="this.onerror=null;this.src='{{ asset($paket->jenis_paket === 'The Waterfall Resto' ? 'images/placeholders/asset 3.webp' : ($paket->jenis_paket === 'Fishing Lake' ? 'images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp' : 'images/Private Images/BCA-Gathering-2048x1137.webp')) }}';">
                         @else
                             <div style="width: 48px; height: 48px; background: var(--bg); border-radius: 6px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--ink-45);">
