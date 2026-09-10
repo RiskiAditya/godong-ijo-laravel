@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pemesanan;
 use App\Models\PaketWisata;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,9 +24,9 @@ class ReportController extends Controller
         $startDate = $validated['start_date'] ?? now()->subDays(30)->format('Y-m-d');
         $endDate = $validated['end_date'] ?? now()->format('Y-m-d');
 
-        // Keep the selected dates inclusive, including the whole end date.
-        $startDateTime = \Carbon\Carbon::parse($startDate)->startOfDay();
-        $endDateTime = \Carbon\Carbon::parse($endDate)->endOfDay();
+        // Keep report boundaries in the application's business timezone.
+        $startDateTime = Carbon::parse($startDate, config('app.timezone'))->startOfDay();
+        $endDateTime = Carbon::parse($endDate, config('app.timezone'))->endOfDay();
         
         // Revenue statistics
         $revenueStats = [
@@ -35,8 +36,7 @@ class ReportController extends Controller
             'average' => Pemesanan::where('status', 'paid')
                 ->whereBetween('created_at', [$startDateTime, $endDateTime])
                 ->avg('total_harga'),
-            'count' => Pemesanan::where('status', 'paid')
-                ->whereBetween('created_at', [$startDateTime, $endDateTime])
+            'count' => Pemesanan::whereBetween('created_at', [$startDateTime, $endDateTime])
                 ->count(),
         ];
         
@@ -58,19 +58,19 @@ class ReportController extends Controller
         
         // Top packages
         $topPackages = PaketWisata::withCount([
-            'pemesanan' => function($query) use ($startDate, $endDate) {
+            'pemesanan' => function($query) use ($startDateTime, $endDateTime) {
                 $query->whereBetween('created_at', [
-                    \Carbon\Carbon::parse($startDate)->startOfDay(),
-                    \Carbon\Carbon::parse($endDate)->endOfDay(),
+                    $startDateTime,
+                    $endDateTime,
                 ]);
             }
         ])
         ->withSum([
-            'pemesanan as revenue' => function($query) use ($startDate, $endDate) {
+            'pemesanan as revenue' => function($query) use ($startDateTime, $endDateTime) {
                 $query->where('status', 'paid')
                       ->whereBetween('created_at', [
-                          \Carbon\Carbon::parse($startDate)->startOfDay(),
-                          \Carbon\Carbon::parse($endDate)->endOfDay(),
+                          $startDateTime,
+                          $endDateTime,
                       ]);
             }
         ], 'total_harga')
@@ -79,21 +79,20 @@ class ReportController extends Controller
         ->take(5)
         ->get();
         
-        // Daily revenue (last 30 days)
-        $dailyRevenueRows = Pemesanan::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_harga) as revenue'),
-                DB::raw('COUNT(*) as bookings')
-            )
+        // Daily revenue for the selected period
+        $dailyRevenueRows = Pemesanan::select(['created_at', 'total_harga'])
             ->where('status', 'paid')
             ->whereBetween('created_at', [$startDateTime, $endDateTime])
-            ->groupBy('date')
-            ->orderBy('date')
             ->get();
 
         // Keep every date in the selected period so the chart reflects the filter
         // even when one or more days have no paid transactions.
-        $dailyRevenueByDate = $dailyRevenueRows->keyBy('date');
+        $dailyRevenueByDate = $dailyRevenueRows
+            ->groupBy(fn ($row) => $row->created_at->toDateString())
+            ->map(fn ($rows) => (object) [
+                'revenue' => $rows->sum('total_harga'),
+                'bookings' => $rows->count(),
+            ]);
         $dailyRevenue = collect();
         for ($date = $startDateTime->copy(); $date->lte($endDateTime); $date->addDay()) {
             $dateKey = $date->toDateString();

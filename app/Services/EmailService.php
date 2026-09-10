@@ -35,6 +35,8 @@ class EmailService implements IEmailService
      */
     public function sendBookingConfirmation(Pemesanan $pemesanan): bool
     {
+        $this->validateTemplateData($pemesanan, 'booking_confirmation');
+
         // Check rate limit first
         if (!$this->checkRateLimit()) {
             $status = $this->getRateLimitStatus();
@@ -44,9 +46,6 @@ class EmailService implements IEmailService
                 now()->format('Y-m-d')
             );
         }
-        
-        // Validate required data
-        $this->validateTemplateData($pemesanan, 'booking_confirmation');
         
         return $this->sendEmailWithRetry(
             $pemesanan->email,
@@ -64,6 +63,8 @@ class EmailService implements IEmailService
      */
     public function sendPaymentSuccess(Pemesanan $pemesanan): bool
     {
+        $this->validateTemplateData($pemesanan, 'payment_success');
+
         // Check rate limit first
         if (!$this->checkRateLimit()) {
             $status = $this->getRateLimitStatus();
@@ -73,9 +74,6 @@ class EmailService implements IEmailService
                 now()->format('Y-m-d')
             );
         }
-        
-        // Validate required data
-        $this->validateTemplateData($pemesanan, 'payment_success');
         
         return $this->sendEmailWithRetry(
             $pemesanan->email,
@@ -94,6 +92,8 @@ class EmailService implements IEmailService
      */
     public function sendCancellationNotification(Pemesanan $pemesanan, string $reason): bool
     {
+        $this->validateTemplateData($pemesanan, 'cancellation');
+
         // Check rate limit first
         if (!$this->checkRateLimit()) {
             $status = $this->getRateLimitStatus();
@@ -103,9 +103,6 @@ class EmailService implements IEmailService
                 now()->format('Y-m-d')
             );
         }
-        
-        // Validate required data
-        $this->validateTemplateData($pemesanan, 'cancellation');
         
         return $this->sendEmailWithRetry(
             $pemesanan->email,
