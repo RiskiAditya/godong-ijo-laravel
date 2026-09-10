@@ -160,13 +160,19 @@ class BookingController extends Controller
                 'errors' => $e->errors(),
             ], 422);
 
-        } catch (\Exception $e) {
-            Log::error('Booking error: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::channel('stderr')->error('Booking error', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan. Silakan coba lagi.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e instanceof \RuntimeException
+                    ? $e->getMessage()
+                    : null,
             ], 500);
         }
     }

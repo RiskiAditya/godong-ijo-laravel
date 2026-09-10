@@ -120,9 +120,14 @@ class BookingCreationService
 
                 try {
                     $snapToken = Snap::getSnapToken($params);
-                } catch (\Exception $e) {
-                    Log::error('Midtrans error: '.$e->getMessage());
-                    throw new \RuntimeException('Pembayaran Midtrans tidak dapat dibuat. Silakan coba lagi.', 0, $e);
+                } catch (\Throwable $e) {
+                    Log::channel('stderr')->error('Midtrans Snap token error', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                        'is_production' => (bool) config('midtrans.is_production'),
+                        'payment_mode' => config('midtrans.payment_mode'),
+                    ]);
+                    throw new \RuntimeException('Pembayaran Midtrans tidak dapat dibuat: '.$e->getMessage(), 0, $e);
                 }
             }
 
@@ -280,9 +285,14 @@ class BookingCreationService
 
                 try {
                     $snapToken = Snap::getSnapToken($params);
-                } catch (\Exception $e) {
-                    Log::error('Midtrans error: '.$e->getMessage());
-                    throw new \RuntimeException('Pembayaran Midtrans tidak dapat dibuat. Silakan coba lagi.', 0, $e);
+                } catch (\Throwable $e) {
+                    Log::channel('stderr')->error('Midtrans fishing Snap token error', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                        'is_production' => (bool) config('midtrans.is_production'),
+                        'payment_mode' => config('midtrans.payment_mode'),
+                    ]);
+                    throw new \RuntimeException('Pembayaran Midtrans tidak dapat dibuat: '.$e->getMessage(), 0, $e);
                 }
             }
 
