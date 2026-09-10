@@ -179,7 +179,9 @@
                                 
                                 <div class="package-action">
                                     <div class="package-price-tag">
+                                        @if($package['name'] !== 'Paket Sport Fishing')
                                         <span class="price-label">{{ $package['price'] }}</span>
+                                        @endif
                                         @if($package['pricePerPerson'])
                                         <span class="price-unit">{{ $package['pricePerPerson'] }}</span>
                                         @endif
@@ -220,8 +222,6 @@
                                                 Pesan
                                             </button>
                                         @endif
-                                    @else
-                                    <a href="#contact" class="btn-hubungi">Hubungi</a>
                                     @endif
                                 </div>
                             </div>
@@ -283,7 +283,9 @@
                                 
                                 <div class="package-action">
                                     <div class="package-price-tag">
+                                        @if($package['name'] !== 'Paket Sport Fishing')
                                         <span class="price-label">{{ $package['price'] }}</span>
+                                        @endif
                                         @if($package['pricePerPerson'])
                                         <span class="price-unit">{{ $package['pricePerPerson'] }}</span>
                                         @endif
@@ -324,8 +326,6 @@
                                                 Pesan
                                             </button>
                                         @endif
-                                    @else
-                                    <a href="#contact" class="btn-hubungi">Hubungi</a>
                                     @endif
                                 </div>
                             </div>
