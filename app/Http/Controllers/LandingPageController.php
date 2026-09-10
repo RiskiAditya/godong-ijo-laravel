@@ -8,6 +8,7 @@ use App\Services\BreadcrumbService;
 use App\Services\SEOService;
 use App\Services\PackageCatalogService;
 use App\Support\PackageTypeCatalog;
+use App\Support\PrivateRoomPackageCatalog;
 use Illuminate\View\View;
 
 class LandingPageController extends Controller
@@ -52,6 +53,7 @@ class LandingPageController extends Controller
         
         // Merge data database dengan data static (badge, features, dll)
         $packages = $this->mergePaketsWithStaticData($pakets_db);
+        $packages = $this->replacePrivateRoomLandingCards($packages, $pakets_db);
         
         $pageData = [
             'seoData' => $this->getSEOMetadata(),
@@ -134,6 +136,46 @@ class LandingPageController extends Controller
         }
 
         return $packages;
+    }
+
+    private function replacePrivateRoomLandingCards(array $packages, $pakets_db): array
+    {
+        $privateRoomTarget = $pakets_db->firstWhere('jenis_paket', 'Private Room');
+
+        if (! $privateRoomTarget) {
+            return $packages;
+        }
+
+        $privateRoomCards = collect(PrivateRoomPackageCatalog::cards())->map(function (array $card) use ($privateRoomTarget) {
+            return [
+                'id' => $privateRoomTarget->id,
+                'name' => $card['name'],
+                'jenis_paket' => 'Private Room',
+                'duration' => 'Pilih durasi di form',
+                'price' => 'Pilih paket',
+                'pricePerPerson' => '',
+                'priceOriginal' => 0,
+                'priceDiscount' => 0,
+                'discountPercent' => 0,
+                'priceUnit' => '',
+                'rating' => 0.0,
+                'included' => [],
+                'description' => $card['description'],
+                'features' => [],
+                'image' => asset($card['image']),
+                'heroImage' => asset($card['image']),
+                'images' => [asset($card['image'])],
+                'alt' => $card['name'],
+                'popular' => false,
+                'badge' => null,
+                'privateRoomOptions' => $card['options'],
+            ];
+        })->all();
+
+        return array_values(array_merge(
+            array_filter($packages, static fn (array $package) => $package['jenis_paket'] !== 'Private Room'),
+            $privateRoomCards,
+        ));
     }
 
     private function resolvePackageImages($paket, array $staticImages = []): array

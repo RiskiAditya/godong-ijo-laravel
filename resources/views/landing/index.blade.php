@@ -196,6 +196,18 @@
                                             >
                                                 Pesan
                                             </button>
+                                        @elseif(isset($package['jenis_paket']) && $package['jenis_paket'] === 'Private Room')
+                                            <button
+                                                type="button"
+                                                class="btn-pesan"
+                                                data-booking-type="private-room"
+                                                data-package-id="{{ $package['id'] }}"
+                                                data-package-name="{{ $package['name'] }}"
+                                                data-package-price="0"
+                                                data-package-image="{{ $package['image'] }}"
+                                                data-package-config="{{ base64_encode(json_encode(['price_type' => 'package', 'minimum_pax' => 1, 'event_type' => 'private_room', 'duration' => 'package', 'private_room_options' => $package['privateRoomOptions']])) }}">
+                                                Pesan
+                                            </button>
                                         @else
                                             {{-- Other packages - open generic modal --}}
                                             <button 
@@ -218,6 +230,9 @@
 
                     {{-- Duplicate packages for seamless infinite loop --}}
                     @foreach($packages as $package)
+                        @if($package['jenis_paket'] === 'Private Room')
+                            @continue
+                        @endif
                         <div class="package-card {{ $package['popular'] ? 'package-card-popular' : '' }}">
                             {{-- Package Image (single or collage based on count) --}}
                             @if(!empty($package['images']))
@@ -283,6 +298,18 @@
                                                 data-destination="{{ $package['name'] }}"
                                                 data-booking-type="fishing"
                                             >
+                                                Pesan
+                                            </button>
+                                        @elseif(isset($package['jenis_paket']) && $package['jenis_paket'] === 'Private Room')
+                                            <button
+                                                type="button"
+                                                class="btn-pesan"
+                                                data-booking-type="private-room"
+                                                data-package-id="{{ $package['id'] }}"
+                                                data-package-name="{{ $package['name'] }}"
+                                                data-package-price="0"
+                                                data-package-image="{{ $package['image'] }}"
+                                                data-package-config="{{ base64_encode(json_encode(['price_type' => 'package', 'minimum_pax' => 1, 'event_type' => 'private_room', 'duration' => 'package', 'private_room_options' => $package['privateRoomOptions']])) }}">
                                                 Pesan
                                             </button>
                                         @else
@@ -450,3 +477,4 @@
 
 {{-- Fishing Booking Modal (Alpine.js) - for Monster Fish / Fishing Lake --}}
 @include('components.fishing-booking-modal')
+@include('components.private-room-booking-modal')
