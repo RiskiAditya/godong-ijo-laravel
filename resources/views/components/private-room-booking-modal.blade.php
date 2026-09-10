@@ -44,6 +44,25 @@
             </div>
             <form id="privateRoomBookingForm">
                 <input type="hidden" id="privateRoomPackageId">
+                @if(!empty($privateRoomPackages))
+                    <div class="private-room-field">
+                        <label for="privateRoomPackageChoice">Pilih Paket *</label>
+                        <select id="privateRoomPackageChoice" required>
+                            @foreach($privateRoomPackages as $privatePackage)
+                                @php
+                                    $privateConfig = $privatePackage->booking_config ?? [];
+                                @endphp
+                                <option
+                                    value="{{ $privatePackage->id }}"
+                                    data-name="{{ $privatePackage->nama_paket }}"
+                                    data-price="{{ $privatePackage->harga }}"
+                                    data-image="{{ asset($privatePackage->foto ?: 'images/Private Images/BCA-Gathering-2048x1137.webp') }}"
+                                    data-config="{{ base64_encode(json_encode($privateConfig)) }}"
+                                >{{ $privatePackage->nama_paket }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="private-room-grid">
                     <div class="private-room-field"><label for="privateRoomNameInput">Nama Lengkap *</label><input id="privateRoomNameInput" required minlength="3"></div>
                     <div class="private-room-field"><label for="privateRoomEmail">Email *</label><input id="privateRoomEmail" type="email" required></div>

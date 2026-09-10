@@ -6339,6 +6339,77 @@ html {
     letter-spacing: -0.015em;
 }
 
+  .private-room-catalog {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .private-room-catalog-intro {
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+
+  .private-room-catalog-intro h2 {
+    margin: 0 0 .65rem;
+    color: #064e3b;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2rem;
+  }
+
+  .private-room-catalog-intro p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .private-room-brochures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .private-room-brochure {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+  }
+
+  .private-room-brochure img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .private-room-catalog-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 767px) {
+    .private-room-catalog {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+
+    .private-room-brochures {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: .75rem;
+    }
+
+    .private-room-brochure {
+      flex: 0 0 88vw;
+      scroll-snap-align: center;
+    }
+  }
+
 /* Packages Section - Improved Container */
 .packages-section {
     padding: 1.5rem 2rem 3rem;
