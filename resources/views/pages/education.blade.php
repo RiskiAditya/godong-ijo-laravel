@@ -146,17 +146,6 @@
                             </div>
                         </div>
 
-                        {{-- Link to the full partner list. Shows a "+N" count only when the rows above don't already cover every partner. --}}
-                        <div class="school-partners-more-container">
-                            <a href="{{ route('education.school-partners') }}" class="school-partner-card school-partner-more">
-                                @if(($pageData['remainingSchoolsCount'] ?? 0) > 0)
-                                    <span class="school-partner-more-count">+{{ $pageData['remainingSchoolsCount'] }}</span>
-                                    <span>sekolah lainnya</span>
-                                @else
-                                    <span>Lihat Semua Mitra Sekolah</span>
-                                @endif
-                            </a>
-                        </div>
                     </div>
                 @else
                     <p class="school-partners-empty">Data sekolah mitra siap ditampilkan setelah seeding database.</p>
