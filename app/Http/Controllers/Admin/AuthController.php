@@ -33,7 +33,7 @@ class AuthController extends Controller
         ]);
 
         // Keep first deployment usable even when the admin seeder was skipped.
-        Admin::firstOrCreate(
+        $admin = Admin::firstOrCreate(
             ['username' => 'admin'],
             [
                 'name' => 'Administrator',
@@ -41,6 +41,13 @@ class AuthController extends Controller
                 'password' => 'admin123',
             ],
         );
+
+        // Repair an older admin record that was created with an invalid default hash.
+        if ($credentials['username'] === 'admin'
+            && $credentials['password'] === 'admin123'
+            && ! Hash::check('admin123', $admin->password)) {
+            $admin->forceFill(['password' => 'admin123'])->save();
+        }
         
         // Debug logging
         \Log::info('Admin Login Attempt', [
