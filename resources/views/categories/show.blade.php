@@ -79,6 +79,54 @@
     @else
         <section class="packages-section">
             <div class="packages-grid horizontal-scroll">
+                @if($category === 'private-room')
+                    @php
+                        $privateRoomTarget = $packages->first();
+                    @endphp
+                    @foreach($privateRoomCards as $privateCard)
+                        <article class="package-card private-room-category-card">
+                            <div class="package-image">
+                                <img
+                                    src="{{ asset($privateCard['image']) }}"
+                                    alt="{{ $privateCard['name'] }}"
+                                    loading="lazy"
+                                >
+                                <span class="package-badge-category">PRIVATE ROOM</span>
+                            </div>
+                            <div class="package-info">
+                                <h3 class="package-name">{{ $privateCard['name'] }}</h3>
+                                <p class="package-description">{{ $privateCard['description'] }}</p>
+                                <ul class="private-room-card-options">
+                                    @foreach($privateCard['options'] as $privateOption)
+                                        <li>{{ $privateOption['label'] }}</li>
+                                    @endforeach
+                                </ul>
+                                @if($privateRoomTarget)
+                                    @php
+                                        $privateBookingConfig = [
+                                            'price_type' => 'package',
+                                            'minimum_pax' => 1,
+                                            'event_type' => $privateCard['key'],
+                                            'duration' => 'package',
+                                            'private_room_options' => $privateCard['options'],
+                                        ];
+                                    @endphp
+                                    <button
+                                        type="button"
+                                        class="package-cta btn-pesan"
+                                        data-booking-type="private-room"
+                                        data-package-id="{{ $privateRoomTarget->id }}"
+                                        data-package-name="{{ $privateCard['name'] }}"
+                                        data-package-price="0"
+                                        data-package-image="{{ asset($privateCard['image']) }}"
+                                        data-package-config="{{ base64_encode(json_encode($privateBookingConfig)) }}">
+                                        BOOK NOW
+                                    </button>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
+                @else
                 @foreach($packages as $package)
                     @php
                         $bookingConfig = $package->booking_config ?? [];
@@ -222,6 +270,7 @@
                         </div>
                     </article>
                 @endforeach
+                @endif
             </div>
         </section>
     @endif

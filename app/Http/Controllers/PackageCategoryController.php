@@ -6,6 +6,7 @@ use App\Services\SEOService;
 use App\Services\BreadcrumbService;
 use App\Services\NavigationService;
 use App\Support\PackageTypeCatalog;
+use App\Support\PrivateRoomPackageCatalog;
 
 /**
  * PackageCategoryController
@@ -159,6 +160,9 @@ class PackageCategoryController extends Controller
             'breadcrumbs' => $breadcrumbs,
             'navigation' => $navigation,
             'cta' => $cta,
+            'privateRoomCards' => $category === 'private-room'
+                ? PrivateRoomPackageCatalog::cards()
+                : [],
         ]);
     }
     

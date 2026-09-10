@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PaketWisata;
+use App\Support\PrivateRoomPackageCatalog;
 
 class BookingPricingService
 {
@@ -21,8 +22,18 @@ class BookingPricingService
         ];
     }
 
-    public function calculateGuestTotal(PaketWisata $paket, int $jumlahOrang): float
+    public function calculateGuestTotal(PaketWisata $paket, int $jumlahOrang, array $packageSpecificData = []): float
     {
+        if ($paket->jenis_paket === 'Private Room' && ! empty($packageSpecificData['private_room_option'])) {
+            $privateOption = PrivateRoomPackageCatalog::option($packageSpecificData['private_room_option']);
+
+            if ($privateOption) {
+                return $privateOption['type'] === 'package'
+                    ? (float) $privateOption['price']
+                    : (float) $privateOption['price'] * $jumlahOrang;
+            }
+        }
+
         $bookingConfig = $paket->booking_config ?? [];
 
         return (($bookingConfig['price_type'] ?? 'per_person') === 'package')

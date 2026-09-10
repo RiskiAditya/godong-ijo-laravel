@@ -44,6 +44,10 @@
             </div>
             <form id="privateRoomBookingForm">
                 <input type="hidden" id="privateRoomPackageId">
+                <div class="private-room-field">
+                    <label for="privateRoomOption">Pilihan Paket *</label>
+                    <select id="privateRoomOption" required></select>
+                </div>
                 <div class="private-room-grid">
                     <div class="private-room-field"><label for="privateRoomNameInput">Nama Lengkap *</label><input id="privateRoomNameInput" required minlength="3"></div>
                     <div class="private-room-field"><label for="privateRoomEmail">Email *</label><input id="privateRoomEmail" type="email" required></div>

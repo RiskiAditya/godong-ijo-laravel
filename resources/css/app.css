@@ -1688,6 +1688,14 @@ h1.hero-modern-heading {
   border-color: var(--forest);
 }
 
+.private-room-card-options {
+  margin: .75rem 0 1rem;
+  padding-left: 1.1rem;
+  color: #475569;
+  font-size: .86rem;
+  line-height: 1.6;
+}
+
 .package-card-popular {
   border: 2px solid var(--gold);
 }

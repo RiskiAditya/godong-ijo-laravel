@@ -14,6 +14,26 @@ function updatePrivateRoomTotal() {
     if (totalElement) totalElement.textContent = privateRoomMoney(total);
 }
 
+function applyPrivateRoomOption(option) {
+    privateRoomBooking = {
+        ...privateRoomBooking,
+        price: Number(option.price),
+        minimum: Number(option.minimum),
+        type: option.type,
+        config: option,
+    };
+    document.getElementById('privateRoomName').textContent = option.label;
+    document.getElementById('privateRoomUnitPrice').textContent = option.description;
+    document.getElementById('privateRoomNote').textContent = option.type === 'package'
+        ? `Harga paket nett. Minimum ${option.minimum} pax.`
+        : `Harga belum termasuk pajak & service. Minimum ${option.minimum} pax.`;
+    document.getElementById('privateRoomPax').min = option.minimum;
+    document.getElementById('privateRoomPax').value = option.minimum;
+    document.getElementById('privateRoomEvent').value = option.event;
+    document.getElementById('privateRoomDuration').value = option.duration;
+    updatePrivateRoomTotal();
+}
+
 function openPrivateRoomModal(data) {
     privateRoomBooking = { ...data, price: Number(data.price), minimum: Number(data.minimum), config: data.config || {} };
     document.getElementById('privateRoomPackageId').value = data.id;
@@ -30,9 +50,23 @@ function openPrivateRoomModal(data) {
     document.getElementById('privateRoomEvent').value = data.event || '';
     document.getElementById('privateRoomDuration').value = data.duration || 'package';
     document.getElementById('privateRoomDate').min = new Date().toISOString().split('T')[0];
+    const optionSelect = document.getElementById('privateRoomOption');
+    optionSelect.innerHTML = '';
+    (data.config.private_room_options || []).forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.key;
+        optionElement.textContent = option.label;
+        optionElement.dataset.option = JSON.stringify(option);
+        optionSelect.appendChild(optionElement);
+    });
+    optionSelect.onchange = () => applyPrivateRoomOption(JSON.parse(optionSelect.selectedOptions[0].dataset.option));
     document.getElementById('privateRoomBookingModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    updatePrivateRoomTotal();
+    if (optionSelect.options.length > 0) {
+        applyPrivateRoomOption(JSON.parse(optionSelect.options[0].dataset.option));
+    } else {
+        updatePrivateRoomTotal();
+    }
 }
 
 function parsePrivateRoomConfig(button) {
@@ -86,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tanggal_kunjungan: document.getElementById('privateRoomDate').value,
             jumlah_orang: pax,
             package_specific_data: {
+                private_room_option: privateRoomBooking.config.key,
                 event_type: document.getElementById('privateRoomEvent').value,
                 expected_attendees: pax,
                 event_duration: document.getElementById('privateRoomDuration').value,

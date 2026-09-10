@@ -19,7 +19,12 @@ class BookingCreationService
     public function createGuestBooking(array $validated): array
     {
         $paket = PaketWisata::findOrFail($validated['paket_wisata_id']);
-        $totalHarga = $this->pricingService->calculateGuestTotal($paket, (int) $validated['jumlah_orang']);
+        $packageSpecificData = $validated['package_specific_data'] ?? [];
+        $totalHarga = $this->pricingService->calculateGuestTotal(
+            $paket,
+            (int) $validated['jumlah_orang'],
+            $packageSpecificData,
+        );
 
         return DB::transaction(function () use ($validated, $paket, $totalHarga) {
             $jadwal = Jadwal::lockForUpdate()
@@ -60,6 +65,16 @@ class BookingCreationService
             $orderId = 'BOOKING-'.$pemesanan->id.'-'.time();
             $paymentMode = config('midtrans.payment_mode', 'live');
             $snapToken = null;
+            $lineItemPrice = $paket->harga;
+            $lineItemQuantity = $validated['jumlah_orang'];
+
+            if ($paket->jenis_paket === 'Private Room' && ! empty($packageSpecificData['private_room_option'])) {
+                $privateOption = \App\Support\PrivateRoomPackageCatalog::option($packageSpecificData['private_room_option']);
+                if ($privateOption) {
+                    $lineItemPrice = $privateOption['price'];
+                    $lineItemQuantity = $privateOption['type'] === 'package' ? 1 : $validated['jumlah_orang'];
+                }
+            }
 
             if ($paymentMode === 'simulation' || empty(config('midtrans.server_key'))) {
                 $snapToken = 'SIMULATION-'.bin2hex(random_bytes(16));
@@ -76,9 +91,9 @@ class BookingCreationService
                     ],
                     'item_details' => [[
                         'id' => 'paket-'.$paket->id,
-                        'price' => $paket->harga,
-                        'quantity' => $validated['jumlah_orang'],
-                        'name' => $paket->nama_paket,
+                        'price' => $lineItemPrice,
+                        'quantity' => $lineItemQuantity,
+                        'name' => $packageSpecificData['private_room_option'] ?? $paket->nama_paket,
                     ]],
                     'customer_details' => [
                         'first_name' => $validated['nama_lengkap'],
