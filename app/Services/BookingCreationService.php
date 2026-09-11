@@ -79,11 +79,7 @@ class BookingCreationService
                 }
             }
 
-            $shouldUseSimulation = $paymentMode === 'simulation'
-                || empty(config('midtrans.server_key'))
-                || (app()->runningUnitTests() && ! config('midtrans.allow_real_in_tests', false));
-
-            if ($shouldUseSimulation) {
+            if ($paymentMode === 'simulation' || empty(config('midtrans.server_key'))) {
                 $snapToken = 'SIMULATION-'.bin2hex(random_bytes(16));
 
                 Log::info('Payment Simulation Mode: Booking created without real Midtrans', [
@@ -159,14 +155,7 @@ class BookingCreationService
     {
         return DB::transaction(function () use ($validated) {
             $kodeBooking = 'GOD-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(4)));
-
-            if (($validated['jenis_pemancingan'] ?? null) === 'kiloan') {
-                $estimasiTotal = config('midtrans.allow_real_in_tests', false)
-                    ? $this->pricingService->calculateFishingPrice($validated)
-                    : null;
-            } else {
-                $estimasiTotal = $this->pricingService->calculateFishingPrice($validated);
-            }
+            $estimasiTotal = $this->pricingService->calculateFishingPrice($validated);
 
             $packageSpecificData = [
                 'jenis_pemancingan' => $validated['jenis_pemancingan'],
@@ -253,11 +242,7 @@ class BookingCreationService
             $snapToken = null;
             $grossAmount = max((float) ($estimasiTotal ?? 0), 1.0);
 
-            $shouldUseSimulation = $paymentMode === 'simulation'
-                || empty(config('midtrans.server_key'))
-                || (app()->runningUnitTests() && ! config('midtrans.allow_real_in_tests', false));
-
-            if ($shouldUseSimulation) {
+            if ($paymentMode === 'simulation' || empty(config('midtrans.server_key'))) {
                 $snapToken = 'SIMULATION-'.bin2hex(random_bytes(16));
                 Log::info('Fishing Booking - Simulation Mode', [
                     'kode_booking' => $kodeBooking,

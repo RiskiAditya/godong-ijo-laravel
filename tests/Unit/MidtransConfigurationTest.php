@@ -293,6 +293,10 @@ class MidtransConfigurationTest extends TestCase
             $notificationService,
         );
 
+        $bookingEmailNotifications->expects($this->once())
+            ->method('paymentSuccess')
+            ->with($this->callback(fn ($model) => $model->id === $booking->id));
+
         $notificationService->expects($this->once())
             ->method('createPaymentNotification')
             ->with($this->callback(fn ($model) => $model->id === $booking->id));

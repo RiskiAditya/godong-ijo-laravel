@@ -53,6 +53,7 @@ class PaymentStatusService
 
             if ($status === 'success' && ! $wasSuccessful && $booking) {
                 $booking->markAsPaid();
+                $this->bookingEmailNotifications->paymentSuccess($booking);
                 $this->notificationService->createPaymentNotification($booking);
             }
 
