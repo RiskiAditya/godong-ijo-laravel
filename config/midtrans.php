@@ -76,4 +76,6 @@ return [
 
     'payment_mode' => env('PAYMENT_MODE', 'live'),
 
+    'allow_real_in_tests' => env('MIDTRANS_ALLOW_REAL_IN_TESTS', false),
+
 ];
