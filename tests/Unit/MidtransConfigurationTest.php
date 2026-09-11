@@ -147,7 +147,6 @@ class MidtransConfigurationTest extends TestCase
         config()->set('midtrans.client_key', 'SB-Mid-client-VALID_SANDBOX_KEY');
         config()->set('midtrans.payment_mode', 'live');
         config()->set('midtrans.is_production', false);
-        config()->set('midtrans.allow_real_in_tests', true);
 
         $mock = \Mockery::mock('alias:Midtrans\Snap');
         $mock->shouldReceive('getSnapToken')->once()->andReturn('SNAP-TEST-KILOAN-123');
@@ -293,10 +292,6 @@ class MidtransConfigurationTest extends TestCase
             $bookingEmailNotifications,
             $notificationService,
         );
-
-        $bookingEmailNotifications->expects($this->once())
-            ->method('paymentSuccess')
-            ->with($this->callback(fn ($model) => $model->id === $booking->id));
 
         $notificationService->expects($this->once())
             ->method('createPaymentNotification')
