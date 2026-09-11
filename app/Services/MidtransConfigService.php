@@ -11,6 +11,7 @@ class MidtransConfigService
         $environment = config('app.env');
         $serverKey = trim((string) config('midtrans.server_key', ''));
         $paymentMode = config('midtrans.payment_mode', 'live');
+        $explicitIsProduction = env('MIDTRANS_IS_PRODUCTION');
         $isSandboxKey = $serverKey !== '' && str_starts_with($serverKey, 'SB-Mid-server-');
         $isProductionKey = $serverKey !== '' && ! $isSandboxKey;
 
@@ -20,8 +21,13 @@ class MidtransConfigService
         } elseif ($serverKey !== '' && $isSandboxKey) {
             config()->set('midtrans.payment_mode', 'live');
             config()->set('midtrans.is_production', false);
-        } elseif ($paymentMode === 'live' && $isProductionKey) {
-            config()->set('midtrans.is_production', true);
+        } elseif ($serverKey !== '' && $isProductionKey) {
+            config()->set('midtrans.payment_mode', 'live');
+            if ($explicitIsProduction !== null) {
+                config()->set('midtrans.is_production', filter_var($explicitIsProduction, FILTER_VALIDATE_BOOLEAN));
+            } else {
+                config()->set('midtrans.is_production', true);
+            }
         } elseif ($paymentMode === 'simulation' && $serverKey === '') {
             config()->set('midtrans.is_production', false);
         }
