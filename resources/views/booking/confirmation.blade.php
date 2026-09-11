@@ -112,18 +112,20 @@
                     <p class="booking-item-label">Tanggal Kunjungan</p>
                     <p class="booking-item-value">{{ $booking->tanggal_kunjungan ? $booking->tanggal_kunjungan->format('d F Y') : ($booking->jadwal?->tanggal?->format('d F Y') ?? '-') }}</p>
                 </div>
-                <div class="booking-item">
-                    <p class="booking-item-label">Jam Kunjungan</p>
-                    <p class="booking-item-value">{{ $booking->jam_kunjungan ?? '-' }}</p>
-                </div>
-                <div class="booking-item">
-                    <p class="booking-item-label">Jenis Pemancingan</p>
-                    <p class="booking-item-value">{{ ucfirst($booking->package_specific_data['jenis_pemancingan'] ?? '-') }}</p>
-                </div>
-                <div class="booking-item">
-                    <p class="booking-item-label">Jumlah Joran</p>
-                    <p class="booking-item-value">{{ $booking->package_specific_data['jumlah_joran'] ?? $booking->jumlah_orang }} joran</p>
-                </div>
+                @if($booking->paketWisata?->jenis_paket === 'Fishing Lake')
+                    <div class="booking-item">
+                        <p class="booking-item-label">Jam Kunjungan</p>
+                        <p class="booking-item-value">{{ $booking->jam_kunjungan ?? '-' }}</p>
+                    </div>
+                    <div class="booking-item">
+                        <p class="booking-item-label">Jenis Pemancingan</p>
+                        <p class="booking-item-value">{{ ucfirst($booking->package_specific_data['jenis_pemancingan'] ?? '-') }}</p>
+                    </div>
+                    <div class="booking-item">
+                        <p class="booking-item-label">Jumlah Joran</p>
+                        <p class="booking-item-value">{{ $booking->package_specific_data['jumlah_joran'] ?? $booking->jumlah_orang }} joran</p>
+                    </div>
+                @endif
                 <div class="booking-item booking-item-highlight">
                     <p class="booking-item-label">Total Pembayaran</p>
                     <p class="booking-item-value">{{ $booking->total_harga !== null ? 'Rp ' . number_format($booking->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}</p>
