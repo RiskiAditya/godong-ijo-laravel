@@ -96,8 +96,7 @@ class BookingController extends Controller
                 ], 400);
             }
 
-            $bookingConfig = $paket->booking_config ?? [];
-            $minimumPax = (int) ($bookingConfig['minimum_pax'] ?? 1);
+            $minimumPax = $this->resolvePrivateRoomMinimumPax($paket, $validated['package_specific_data'] ?? []);
             if ($paket->jenis_paket === 'Private Room' && $validated['jumlah_orang'] < $minimumPax) {
                 return response()->json([
                     'success' => false,
@@ -227,6 +226,25 @@ class BookingController extends Controller
                     : null,
             ], 500);
         }
+    }
+
+    private function resolvePrivateRoomMinimumPax(PaketWisata $paket, array $packageSpecificData = []): int
+    {
+        if ($paket->jenis_paket !== 'Private Room') {
+            return 1;
+        }
+
+        $selectedOptionKey = data_get($packageSpecificData, 'private_room_option');
+        if (filled($selectedOptionKey)) {
+            $option = \App\Support\PrivateRoomPackageCatalog::option($selectedOptionKey);
+            if (is_array($option) && isset($option['minimum'])) {
+                return max(1, (int) $option['minimum']);
+            }
+        }
+
+        $bookingConfig = $paket->booking_config ?? [];
+
+        return max(1, (int) ($bookingConfig['minimum_pax'] ?? 1));
     }
 
     /**
