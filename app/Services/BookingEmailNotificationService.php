@@ -12,51 +12,69 @@ class BookingEmailNotificationService
     {
     }
 
-    public function confirmation(Pemesanan $booking): void
+    public function confirmation(Pemesanan $booking): bool
     {
         if (!SystemSetting::enabled('email_notification')) {
-            return;
+            Log::warning('Booking confirmation email skipped because email notifications are disabled', [
+                'booking_code' => $booking->kode_booking,
+            ]);
+
+            return false;
         }
 
         try {
-            $this->emailService->sendBookingConfirmation($booking);
+            return $this->emailService->sendBookingConfirmation($booking);
         } catch (\Throwable $exception) {
             Log::error('Failed to send booking confirmation email', [
                 'booking_code' => $booking->kode_booking,
                 'error' => $exception->getMessage(),
             ]);
+
+            return false;
         }
     }
 
-    public function paymentSuccess(Pemesanan $booking): void
+    public function paymentSuccess(Pemesanan $booking): bool
     {
         if (!SystemSetting::enabled('email_notification')) {
-            return;
+            Log::warning('Payment success email skipped because email notifications are disabled', [
+                'booking_code' => $booking->kode_booking,
+            ]);
+
+            return false;
         }
 
         try {
-            $this->emailService->sendPaymentSuccess($booking);
+            return $this->emailService->sendPaymentSuccess($booking);
         } catch (\Throwable $exception) {
             Log::error('Failed to send payment success email', [
                 'booking_code' => $booking->kode_booking,
                 'error' => $exception->getMessage(),
             ]);
+
+            return false;
         }
     }
 
-    public function cancellation(Pemesanan $booking, string $reason): void
+    public function cancellation(Pemesanan $booking, string $reason): bool
     {
         if (!SystemSetting::enabled('email_notification')) {
-            return;
+            Log::warning('Cancellation email skipped because email notifications are disabled', [
+                'booking_code' => $booking->kode_booking,
+            ]);
+
+            return false;
         }
 
         try {
-            $this->emailService->sendCancellationNotification($booking, $reason);
+            return $this->emailService->sendCancellationNotification($booking, $reason);
         } catch (\Throwable $exception) {
             Log::error('Failed to send booking cancellation email', [
                 'booking_code' => $booking->kode_booking,
                 'error' => $exception->getMessage(),
             ]);
+
+            return false;
         }
     }
 }

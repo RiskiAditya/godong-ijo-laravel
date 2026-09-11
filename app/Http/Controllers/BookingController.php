@@ -161,7 +161,7 @@ class BookingController extends Controller
 
             $emailSent = true;
             try {
-                $this->bookingEmailNotifications->confirmation($pemesanan);
+                $emailSent = $this->bookingEmailNotifications->confirmation($pemesanan);
             } catch (\Exception $e) {
                 $emailSent = false;
                 Log::error('Failed to send booking confirmation email', [
@@ -437,6 +437,8 @@ class BookingController extends Controller
                 $paymentType,
                 $transactionId,
             );
+
+            $pembayaran = $pembayaran->fresh(['pemesanan.pembayaran']);
 
             return response()->json([
                 'success' => true,
