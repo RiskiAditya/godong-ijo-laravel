@@ -27,13 +27,15 @@ class PaymentSuccessMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pembayaran Berhasil - E-Ticket '.$this->pemesanan->kode_booking)
+        return $this->subject('Pembayaran Berhasil - '.$this->pemesanan->package_display_name.' - '.$this->pemesanan->kode_booking)
             ->view('emails.payment-success')
             ->text('emails.payment-success-text')
             ->with([
                 'pemesanan' => $this->pemesanan,
                 'pembayaran' => $this->pemesanan->pembayaran,
                 'paket' => $this->pemesanan->paketWisata ?? $this->pemesanan->jadwal?->paket,
+                'packageDisplayName' => $this->pemesanan->package_display_name,
+                'packageType' => $this->pemesanan->package_type,
             ])
             ->withHeaders([
                 'X-Priority' => '1',

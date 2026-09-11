@@ -45,7 +45,7 @@
                                             </tr>
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Paket Wisata</td>
-                                                <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $paket?->nama_paket ?? 'Paket Wisata' }}</td>
+                                                <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $packageDisplayName ?? $paket?->nama_paket ?? 'Paket Wisata' }}</td>
                                             </tr>
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Tanggal Kunjungan</td>
@@ -55,6 +55,17 @@
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Jumlah Orang</td>
                                                 <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $pemesanan->jumlah_orang }} orang</td>
                                             </tr>
+                                            @if(($packageType ?? null) === 'private-room')
+                                                <tr>
+                                                    <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Jenis Acara</td>
+                                                    <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ ucfirst($pemesanan->package_specific_data['event_type'] ?? '-') }}</td>
+                                                </tr>
+                                            @elseif(($packageType ?? null) === 'fishing-lake')
+                                                <tr>
+                                                    <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Jenis Pemancingan</td>
+                                                    <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ ucfirst(str_replace('_', ' ', $pemesanan->package_specific_data['jenis_pemancingan'] ?? '-')) }}</td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Metode Pembayaran</td>
                                                 <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ strtoupper($pembayaran->payment_type ?? 'N/A') }}</td>

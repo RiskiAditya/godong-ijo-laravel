@@ -106,6 +106,51 @@ class BookingController extends Controller
                 ], 422);
             }
 
+            // Reuse an unfinished booking instead of reserving the same quota again
+            // when a customer retries the payment form.
+            $requestedOption = data_get($validated, 'package_specific_data.private_room_option');
+            $existingBooking = Pemesanan::with(['pembayaran', 'paketWisata'])
+                ->where('paket_wisata_id', $paket->id)
+                ->where('email', $validated['email'])
+                ->where(function ($query) use ($validated) {
+                    $query->whereDate('tanggal_kunjungan', $validated['tanggal_kunjungan'])
+                        ->orWhereHas('jadwal', fn ($jadwalQuery) => $jadwalQuery->whereDate('tanggal', $validated['tanggal_kunjungan']));
+                })
+                ->where('status', 'pending')
+                ->whereHas('pembayaran', fn ($query) => $query->where('status', 'pending'))
+                ->latest('id')
+                ->get()
+                ->first(function (Pemesanan $booking) use ($requestedOption) {
+                    return data_get($booking->package_specific_data, 'private_room_option') === $requestedOption;
+                });
+
+            if ($existingBooking) {
+                if (! $existingBooking->pembayaran?->snap_token) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Booking pending sudah ditemukan, tetapi token pembayaran tidak tersedia. Silakan hubungi admin dengan kode booking '.$existingBooking->kode_booking.'.',
+                    ], 409);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking sebelumnya ditemukan. Silakan lanjutkan pembayaran.',
+                    'data' => [
+                        'pemesanan_id' => $existingBooking->id,
+                        'kode_booking' => $existingBooking->kode_booking,
+                        'order_id' => $existingBooking->pembayaran->order_id,
+                        'snap_token' => $existingBooking->pembayaran->snap_token,
+                        'gross_amount' => $existingBooking->pembayaran->gross_amount,
+                        'paket_nama' => $existingBooking->paketWisata?->nama_paket ?? $paket->nama_paket,
+                        'tanggal_kunjungan' => $existingBooking->tanggal_kunjungan?->toDateString() ?? $validated['tanggal_kunjungan'],
+                        'jumlah_orang' => $existingBooking->jumlah_orang,
+                        'payment_mode' => config('midtrans.payment_mode', 'live'),
+                        'email_sent' => true,
+                        'redirect_url' => route('booking.confirmation', $existingBooking->kode_booking),
+                    ],
+                ], 200);
+            }
+
             $created = $this->bookingCreationService->createGuestBooking($validated);
             $pemesanan = $created['pemesanan'];
             $orderId = $created['order_id'];
@@ -161,6 +206,13 @@ class BookingController extends Controller
             ], 422);
 
         } catch (\Throwable $e) {
+            if ($e instanceof \RuntimeException && str_contains($e->getMessage(), 'Kuota tidak mencukupi')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kuota untuk tanggal tersebut sudah penuh. Silakan pilih tanggal atau jumlah peserta lain.',
+                ], 409);
+            }
+
             Log::channel('stderr')->error('Booking error', [
                 'exception' => get_class($e),
                 'message' => $e->getMessage(),

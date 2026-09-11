@@ -182,12 +182,10 @@ Route::middleware(['web'])->group(function () {
     // Midtrans payment notification webhook (CSRF exempt - handled by VerifyCsrfToken middleware)
     Route::post('midtrans/notification', [App\Http\Controllers\BookingController::class, 'notification'])->name('api.midtrans.notification');
     
-    // Manual check payment status is only available for local webhook testing.
-    if (app()->environment('local')) {
-        Route::get('midtrans/check-payment/{orderId}', [App\Http\Controllers\BookingController::class, 'checkPaymentStatus'])
-            ->middleware('throttle:10,1')
-            ->name('api.midtrans.check-payment');
-    }
+    // Sync the customer-facing payment callback when the webhook is delayed.
+    Route::get('midtrans/check-payment/{orderId}', [App\Http\Controllers\BookingController::class, 'checkPaymentStatus'])
+        ->middleware('throttle:10,1')
+        ->name('api.midtrans.check-payment');
     
 });
 

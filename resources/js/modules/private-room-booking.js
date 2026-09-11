@@ -143,7 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
             closePrivateRoomModal();
             if (result.data?.snap_token && typeof window.snap !== 'undefined') {
                 window.snap.pay(result.data.snap_token, {
-                    onSuccess: () => { window.location.href = result.data.redirect_url; },
+                    onSuccess: async () => {
+                        try {
+                            await fetch(`/midtrans/check-payment/${encodeURIComponent(result.data.order_id)}`);
+                        } catch (error) {
+                            console.error('Payment status check failed:', error);
+                        }
+                        window.location.href = result.data.redirect_url + '?from_payment=1';
+                    },
                     onPending: () => alert('Pembayaran masih menunggu konfirmasi.'),
                     onError: () => alert('Pembayaran gagal.'),
                 });

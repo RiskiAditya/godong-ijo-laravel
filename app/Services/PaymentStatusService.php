@@ -39,7 +39,9 @@ class PaymentStatusService
                 ->with('pemesanan')
                 ->lockForUpdate()
                 ->findOrFail($pembayaran->id);
-            $booking = $lockedPayment->pemesanan;
+            $booking = $lockedPayment->pemesanan()
+                ->with(['paketWisata', 'jadwal', 'pembayaran'])
+                ->first();
             $wasSuccessful = $lockedPayment->status === 'success';
             $wasReleased = in_array($lockedPayment->status, ['failed', 'expired'], true);
 

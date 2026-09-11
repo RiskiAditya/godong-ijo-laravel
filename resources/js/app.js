@@ -14,6 +14,7 @@ import { navigationDropdown } from './modules/navigation-dropdown.js';
 import './modules/fishing-booking-modal.js';
 import './modules/landing-page.js';
 import './modules/private-room-booking.js';
+import './modules/booking-payment.js';
 
 // Register Alpine.js collapse plugin
 Alpine.plugin(collapse);

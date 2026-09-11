@@ -58,6 +58,7 @@ class BookingCreationService
                 'no_hp' => $validated['no_hp'],
                 'jumlah_orang' => $validated['jumlah_orang'],
                 'package_specific_data' => $validated['package_specific_data'] ?? null,
+                'tanggal_kunjungan' => $validated['tanggal_kunjungan'],
                 'total_harga' => $totalHarga,
                 'status' => 'pending',
             ]);

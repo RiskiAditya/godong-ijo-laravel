@@ -76,6 +76,25 @@
             </div>
         </div>
 
+        @if($booking->pembayaran?->status === 'pending' && $booking->pembayaran?->snap_token)
+            <div class="payment-resume-panel">
+                <div>
+                    <p class="payment-resume-label">Pembayaran belum selesai</p>
+                    <p class="payment-resume-text">Lanjutkan pembayaran untuk mengonfirmasi booking {{ $booking->kode_booking }}.</p>
+                </div>
+                <button
+                    type="button"
+                    id="resume-payment-button"
+                    class="button button-primary"
+                    data-snap-token="{{ $booking->pembayaran->snap_token }}"
+                    data-order-id="{{ $booking->pembayaran->order_id }}"
+                    data-redirect-url="{{ route('booking.confirmation', ['kode_booking' => $booking->kode_booking]) }}"
+                >
+                    Lanjutkan Pembayaran
+                </button>
+            </div>
+        @endif
+
         {{-- Booking Details --}}
         <div class="booking-card">
             <div class="booking-card-header">
@@ -248,6 +267,32 @@
 .alert-description {
     margin: 0;
     color: #475569;
+}
+.payment-resume-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+}
+.payment-resume-label {
+    margin: 0 0 4px;
+    color: #92400e;
+    font-weight: 700;
+}
+.payment-resume-text {
+    margin: 0;
+    color: #78350f;
+}
+@media (max-width: 640px) {
+    .payment-resume-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
 }
 .confirmation-hero {
     background: linear-gradient(180deg, rgba(236, 253, 245, 0.95) 0%, rgba(220, 252, 231, 0.95) 100%);

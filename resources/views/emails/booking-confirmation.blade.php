@@ -32,7 +32,7 @@
                                 Halo <strong>{{ $pemesanan->nama_lengkap }}</strong>,
                             </p>
                             <p style="margin: 15px 0 0 0; font-size: 15px; color: #374151; line-height: 1.6;">
-                                Booking Anda dengan kode <strong>{{ $pemesanan->kode_booking }}</strong> telah berhasil dibuat untuk paket <strong>{{ $paket->nama_paket }}</strong>. Silakan lanjutkan pembayaran untuk mengkonfirmasi kunjungan Anda.
+                                Booking Anda dengan kode <strong>{{ $pemesanan->kode_booking }}</strong> telah berhasil dibuat untuk <strong>{{ $packageDisplayName ?? $paket?->nama_paket ?? 'Paket Wisata' }}</strong>. Silakan lanjutkan pembayaran untuk mengkonfirmasi kunjungan Anda.
                             </p>
                         </td>
                     </tr>
@@ -56,9 +56,28 @@
                                             <tr>
                                                 <td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td>
                                             </tr>
+                                            @if(($packageType ?? null) === 'private-room')
+                                                <tr>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #6b7280;">Jenis Acara</td>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right;">{{ ucfirst($pemesanan->package_specific_data['event_type'] ?? '-') }}</td>
+                                                </tr>
+                                            @elseif(($packageType ?? null) === 'fishing-lake')
+                                                <tr>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #6b7280;">Jenis Pemancingan</td>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right;">{{ ucfirst(str_replace('_', ' ', $pemesanan->package_specific_data['jenis_pemancingan'] ?? '-')) }}</td>
+                                                </tr>
+                                            @else
+                                                <tr>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #6b7280;">Jenis Kunjungan</td>
+                                                    <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right;">The Waterfall Resto</td>
+                                                </tr>
+                                            @endif
+                                            <tr>
+                                                <td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td>
+                                            </tr>
                                             <tr>
                                                 <td style="padding: 8px 0; font-size: 14px; color: #6b7280;">Paket Wisata</td>
-                                                <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right;">{{ $paket->nama_paket }}</td>
+                                                <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right;">{{ $packageDisplayName ?? $paket?->nama_paket ?? 'Paket Wisata' }}</td>
                                             </tr>
                                             <tr>
                                                 <td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td>

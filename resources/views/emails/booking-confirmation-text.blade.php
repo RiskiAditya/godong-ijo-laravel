@@ -11,7 +11,14 @@ DETAIL PEMESANAN
 =================================================
 
 Kode Booking      : {{ $pemesanan->kode_booking }}
-Paket Wisata      : {{ $paket->nama_paket }}
+Paket Wisata      : {{ $packageDisplayName ?? $paket?->nama_paket ?? 'Paket Wisata' }}
+@if(($packageType ?? null) === 'private-room')
+Jenis Acara       : {{ ucfirst($pemesanan->package_specific_data['event_type'] ?? '-') }}
+@elseif(($packageType ?? null) === 'fishing-lake')
+Jenis Pemancingan : {{ ucfirst(str_replace('_', ' ', $pemesanan->package_specific_data['jenis_pemancingan'] ?? '-')) }}
+@else
+Jenis Kunjungan   : The Waterfall Resto
+@endif
 Tanggal Kunjungan : {{ \Carbon\Carbon::parse($pemesanan->tanggal_kunjungan ?? $jadwal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
 Jumlah Orang      : {{ $pemesanan->jumlah_orang }} orang
 

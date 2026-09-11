@@ -27,12 +27,14 @@ class BookingConfirmationMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Konfirmasi Booking - '.$this->pemesanan->kode_booking)
+        return $this->subject('Booking '.$this->pemesanan->package_display_name.' - '.$this->pemesanan->kode_booking)
             ->view('emails.booking-confirmation')
             ->text('emails.booking-confirmation-text')
             ->with([
                 'pemesanan' => $this->pemesanan,
                 'paket' => $this->pemesanan->paketWisata ?? $this->pemesanan->jadwal?->paket,
+                'packageDisplayName' => $this->pemesanan->package_display_name,
+                'packageType' => $this->pemesanan->package_type,
                 'jadwal' => $this->pemesanan->jadwal,
             ])
             ->withHeaders([

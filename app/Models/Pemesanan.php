@@ -100,6 +100,35 @@ class Pemesanan extends Model
     {
         $this->update(['status' => 'paid']);
     }
+
+    public function getPackageDisplayNameAttribute(): string
+    {
+        $packageName = $this->paketWisata?->nama_paket ?? 'Paket Wisata';
+        $specificData = $this->package_specific_data ?? [];
+
+        if (! empty($specificData['private_room_option'])) {
+            $privateOption = \App\Support\PrivateRoomPackageCatalog::option($specificData['private_room_option']);
+
+            return $privateOption['label'] ?? $packageName;
+        }
+
+        if (! empty($specificData['jenis_pemancingan'])) {
+            return 'Fishing Lake - '.ucwords(str_replace('_', ' ', $specificData['jenis_pemancingan']));
+        }
+
+        return $packageName;
+    }
+
+    public function getPackageTypeAttribute(): string
+    {
+        $packageType = $this->paketWisata?->jenis_paket;
+
+        return match ($packageType) {
+            'Private Room' => 'private-room',
+            'Fishing Lake' => 'fishing-lake',
+            default => 'the-waterfall-resto',
+        };
+    }
     
     /**
      * Mark as cancelled
