@@ -19,9 +19,23 @@ class PaketWisataController extends Controller
         $query->where(function ($packageQuery) {
             $packageQuery
                 ->where('jenis_paket', '!=', 'Private Room')
-                ->orWhereIn('nama_paket', ['Meeting Package', 'Gathering Package', 'Wedding Package']);
+                ->orWhereIn('nama_paket', [
+                    'Meeting Package',
+                    'Gathering Package',
+                    'Wedding Package',
+                ]);
         });
-        
+
+        $query->whereNotIn('nama_paket', [
+            'Wedding Intimate Package',
+            'Engagement Intimate Package',
+            'Paket Half Day Gathering',
+            'Paket Full Day Gathering',
+            'Paket Half Day Meeting',
+            'Paket Full Day Meeting',
+            'Paket VIP Meeting',
+        ]);
+
         // Search
         if ($request->filled('search')) {
             $query->where('nama_paket', 'like', '%' . $request->search . '%')

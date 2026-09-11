@@ -2,6 +2,32 @@
 
 @section('title', 'Konfirmasi Booking - ' . $booking->kode_booking)
 
+@php
+    $packageData = $booking->package_specific_data ?? [];
+    $fishingType = $packageData['jenis_pemancingan'] ?? null;
+    $fishingTypeLabel = $fishingType ? ucwords(str_replace('_', ' ', $fishingType)) : null;
+    $needsRental = (bool) ($packageData['perlu_sewa_alat'] ?? false) || $fishingType === 'sewa_joran';
+    $rodQuantity = $packageData['jumlah_joran'] ?? $booking->jumlah_orang;
+    $rodSize = $packageData['ukuran_joran'] ?? null;
+    $rodSizeLabel = match ($rodSize) {
+        'standar' => 'Standar',
+        'besar' => 'Besar',
+        default => null,
+    };
+    $durasi = $packageData['durasi'] ?? null;
+    $tambahanJam = (int) ($packageData['tambahan_jam'] ?? 0);
+    $umpanData = $packageData['umpan'] ?? [];
+    $tambahanUmpan = [];
+
+    if (($umpanData['anak_ikan_komet'] ?? 0) > 0) {
+        $tambahanUmpan[] = 'Anak Ikan Komet: ' . (int) $umpanData['anak_ikan_komet'] . ' pack';
+    }
+
+    if (($umpanData['umpan_jadi_godongijo'] ?? 0) > 0) {
+        $tambahanUmpan[] = 'Umpan Jadi Godongijo: ' . (int) $umpanData['umpan_jadi_godongijo'] . ' pack';
+    }
+@endphp
+
 @section('content')
 <div class="confirmation-page">
     <div class="page-container">
@@ -115,16 +141,52 @@
                 @if($booking->paketWisata?->jenis_paket === 'Fishing Lake')
                     <div class="booking-item">
                         <p class="booking-item-label">Jam Kunjungan</p>
-                        <p class="booking-item-value">{{ $booking->jam_kunjungan ?? '-' }}</p>
+                        <p class="booking-item-value">{{ $booking->jam_kunjungan ?? ($packageData['jam_kunjungan'] ?? '-') }}</p>
                     </div>
                     <div class="booking-item">
                         <p class="booking-item-label">Jenis Pemancingan</p>
-                        <p class="booking-item-value">{{ ucfirst($booking->package_specific_data['jenis_pemancingan'] ?? '-') }}</p>
+                        <p class="booking-item-value">{{ $fishingTypeLabel ?? '-' }}</p>
                     </div>
+                    @if($fishingType === 'tarikan' && $durasi)
+                        <div class="booking-item">
+                            <p class="booking-item-label">Durasi</p>
+                            <p class="booking-item-value">{{ $durasi }} jam</p>
+                        </div>
+                        @if($tambahanJam > 0)
+                            <div class="booking-item">
+                                <p class="booking-item-label">Tambahan Jam</p>
+                                <p class="booking-item-value">{{ $tambahanJam }} jam</p>
+                            </div>
+                        @endif
+                    @endif
                     <div class="booking-item">
                         <p class="booking-item-label">Jumlah Joran</p>
-                        <p class="booking-item-value">{{ $booking->package_specific_data['jumlah_joran'] ?? $booking->jumlah_orang }} joran</p>
+                        <p class="booking-item-value">{{ $rodQuantity }} joran</p>
                     </div>
+                    @if($needsRental)
+                        <div class="booking-item">
+                            <p class="booking-item-label">Sewa Alat</p>
+                            <p class="booking-item-value">
+                                @if($rodSizeLabel)
+                                    Ya • {{ $rodSizeLabel }}
+                                @else
+                                    Ya
+                                @endif
+                            </p>
+                        </div>
+                        @if($rodSizeLabel)
+                            <div class="booking-item">
+                                <p class="booking-item-label">Ukuran Joran</p>
+                                <p class="booking-item-value">{{ $rodSizeLabel }}</p>
+                            </div>
+                        @endif
+                    @endif
+                    @if(! empty($tambahanUmpan))
+                        <div class="booking-item booking-item-full">
+                            <p class="booking-item-label">Tambahan Umpan</p>
+                            <p class="booking-item-value">{{ implode(' • ', $tambahanUmpan) }}</p>
+                        </div>
+                    @endif
                 @endif
                 <div class="booking-item booking-item-highlight">
                     <p class="booking-item-label">Total Pembayaran</p>
@@ -166,6 +228,71 @@
                     <span class="detail-label">No. WhatsApp</span>
                     <a href="https://wa.me/62{{ ltrim($booking->no_hp, '0') }}" target="_blank" class="detail-link">{{ $booking->no_hp }}</a>
                 </div>
+            </div>
+        </div>
+
+        <div class="print-only-document" aria-label="Dokumen booking untuk cetak PDF">
+            <div class="print-brand-row">
+                <div class="print-brand-wrap">
+                    <img src="{{ asset('images/placeholders/The-Waterfall-Logo-removebg-preview.png') }}" alt="Godong Ijo Logo" class="print-brand-logo">
+                </div>
+                <div class="print-status-pill">Booking Berhasil</div>
+            </div>
+
+            <div class="print-header-card">
+                <div class="print-header-label">Kode Booking</div>
+                <div class="print-booking-code">{{ $booking->kode_booking }}</div>
+                <div class="print-header-note">Bukti reservasi pelanggan • {{ $booking->tanggal_kunjungan ? $booking->tanggal_kunjungan->format('d F Y') : ($booking->jadwal?->tanggal?->format('d F Y') ?? '-') }}</div>
+            </div>
+
+            <div class="print-summary-grid">
+                <div class="print-summary-card print-summary-card--primary">
+                    <div class="print-summary-label">Total Pembayaran</div>
+                    <div class="print-summary-value">{{ $booking->total_harga !== null ? 'Rp ' . number_format($booking->total_harga, 0, ',', '.') : 'Dihitung saat ditimbang' }}</div>
+                </div>
+                <div class="print-summary-card">
+                    <div class="print-summary-label">Status</div>
+                    <div class="print-summary-value small">{{ $booking->pembayaran && $booking->pembayaran->status === 'success' ? 'Lunas' : 'Menunggu Pembayaran' }}</div>
+                </div>
+                <div class="print-summary-card">
+                    <div class="print-summary-label">Jumlah Orang</div>
+                    <div class="print-summary-value small">{{ $booking->jumlah_orang }} orang</div>
+                </div>
+                <div class="print-summary-card">
+                    <div class="print-summary-label">Waktu Kunjungan</div>
+                    <div class="print-summary-value small">{{ $booking->jam_kunjungan ?? ($packageData['jam_kunjungan'] ?? '-') }}</div>
+                </div>
+            </div>
+
+            <div class="print-detail-grid">
+                <div class="print-detail-card">
+                    <div class="print-card-title">Informasi Pemesan</div>
+                    <div class="print-row"><span>Nama</span><strong>{{ $booking->nama_lengkap }}</strong></div>
+                    <div class="print-row"><span>Email</span><strong>{{ $booking->email ?? '-' }}</strong></div>
+                    <div class="print-row"><span>WhatsApp</span><strong>{{ $booking->no_hp ?? '-' }}</strong></div>
+                </div>
+
+                <div class="print-detail-card">
+                    <div class="print-card-title">Detail Pemesanan</div>
+                    <div class="print-row"><span>Paket</span><strong>{{ $booking->paketWisata?->nama_paket ?? 'Pemancingan' }}</strong></div>
+                    <div class="print-row"><span>Tanggal</span><strong>{{ $booking->tanggal_kunjungan ? $booking->tanggal_kunjungan->format('d F Y') : ($booking->jadwal?->tanggal?->format('d F Y') ?? '-') }}</strong></div>
+                    <div class="print-row"><span>Jam</span><strong>{{ $booking->jam_kunjungan ?? ($packageData['jam_kunjungan'] ?? '-') }}</strong></div>
+                    <div class="print-row"><span>Metode</span><strong>{{ $booking->pembayaran?->payment_method ?? 'Midtrans' }}</strong></div>
+                </div>
+            </div>
+
+            <div class="print-note-box">
+                <div class="print-note-title">Informasi penting</div>
+                <ul>
+                    <li>Tunjukkan kode booking ini saat check-in di lokasi.</li>
+                    <li>Mohon datang 15 menit sebelum jadwal kunjungan.</li>
+                    <li>Konfirmasi detail booking ini telah dikirim ke email pemesan.</li>
+                </ul>
+            </div>
+
+            <div class="print-footer">
+                <div>Godong Ijo · Curug Nangka, Bogor, Jawa Barat</div>
+                <div>Email: {{ $booking->email ?? 'info@godongijo.com' }} · WhatsApp: {{ $booking->no_hp ?? '0812-3456-7890' }}</div>
             </div>
         </div>
 
@@ -647,6 +774,9 @@
 .support-link:hover {
     color: #04864f;
 }
+.print-only-document {
+    display: none;
+}
 @media (max-width: 768px) {
     .page-container {
         padding: 0 16px;
@@ -657,13 +787,258 @@
     }
 }
 @media print {
-    body {
-        background: white !important;
+    :root {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
-    nav, footer, button, .no-print {
+
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-size: 11px;
+    }
+
+    header,
+    nav,
+    footer,
+    .skip-nav,
+    .whatsapp-float,
+    .ai-chatbot,
+    .button-grid,
+    .alert-success,
+    .payment-resume-panel,
+    .info-card,
+    .support-block,
+    .no-print,
+    .button,
+    .detail-link,
+    .support-link,
+    .receipt-icon,
+    .customer-card-header svg,
+    .booking-card-header svg {
         display: none !important;
     }
-    .alert-success, .confirmation-hero, .confirmation-code-card, .receipt-panel, .customer-card, .info-card {
+
+    .confirmation-page {
+        min-height: auto;
+        background: #ffffff;
+        padding: 0;
+    }
+
+    .page-container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .confirmation-hero,
+    .confirmation-code-card,
+    .receipt-panel,
+    .customer-card,
+    .booking-card,
+    .button-grid,
+    .info-card,
+    .support-block,
+    .alert-success,
+    .payment-resume-panel {
+        display: none !important;
+    }
+
+    .print-only-document {
+        display: block !important;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: none;
+        color: #111827;
+    }
+
+    .print-brand-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 16px;
+    }
+
+    .print-brand-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .print-brand-logo {
+        width: 120px;
+        height: auto;
+        max-height: 72px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .print-status-pill {
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .print-header-card {
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+
+    .print-header-label {
+        margin: 0 0 6px;
+        color: #6b7280;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .print-booking-code {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        color: #166534;
+    }
+
+    .print-header-note {
+        margin-top: 6px;
+        color: #475569;
+        font-size: 10px;
+    }
+
+    .print-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .print-summary-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+
+    .print-summary-card--primary {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .print-summary-label {
+        color: #6b7280;
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .print-summary-value {
+        color: #111827;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .print-summary-value.small {
+        font-size: 12px;
+    }
+
+    .print-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .print-detail-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #ffffff;
+    }
+
+    .print-card-title {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .print-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 11px;
+    }
+
+    .print-row:last-child {
+        border-bottom: none;
+    }
+
+    .print-row span {
+        color: #6b7280;
+    }
+
+    .print-row strong {
+        color: #111827;
+        text-align: right;
+        font-weight: 700;
+    }
+
+    .print-note-box {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #f9fafb;
+        margin-bottom: 16px;
+    }
+
+    .print-note-title {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .print-note-box ul {
+        margin: 0;
+        padding-left: 18px;
+        color: #475569;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .print-footer {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 12px;
+        color: #475569;
+        font-size: 10px;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    a[href]:after {
+        content: none !important;
     }
 }
 </style>

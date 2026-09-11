@@ -2,10 +2,15 @@ function fishingBookingModal(pricing = {}) {
   return {
     pricing: {
       basePrice: Number(pricing.base_price || 0),
-      komet: Number(pricing.komet || 0),
-      umpanJadi: Number(pricing.umpan_jadi || 0),
-      sewaAlat: Number(pricing.sewa_alat || 0),
-      tambahanJam: Number(pricing.tambahan_jam || 0)
+      komet: Number(pricing.komet || 11000),
+      umpanJadi: Number(pricing.umpan_jadi || 11000),
+      sewaAlatStandar: Number(pricing.sewa_alat_standar || 20000),
+      sewaAlatBesar: Number(pricing.sewa_alat_besar || 50000),
+      tambahanJam: Number(pricing.tambahan_jam || 40000),
+      tarikanDurasi: {
+        '2': Number(pricing.tarikan_durasi?.['2'] || 80000),
+        '4': Number(pricing.tarikan_durasi?.['4'] || 110000)
+      }
     },
     isOpen: false,
     loading: false,
@@ -109,19 +114,22 @@ function fishingBookingModal(pricing = {}) {
         + (Number(this.formData.qty_umpan_jadi) * this.pricing.umpanJadi);
       let sewaTotal = 0;
       if (this.formData.perlu_sewa_alat && this.formData.ukuran_joran) {
-        sewaTotal = this.pricing.sewaAlat;
+        sewaTotal = this.formData.ukuran_joran === 'besar'
+          ? this.pricing.sewaAlatBesar
+          : this.pricing.sewaAlatStandar;
       }
       let mancingTotal = 0;
       if (this.formData.jenis_pemancingan !== 'kiloan') {
-        mancingTotal = this.pricing.basePrice * jumlahJoran;
         if (this.formData.jenis_pemancingan === 'tarikan') {
-          mancingTotal += Number(this.formData.tambahan_jam) * this.pricing.tambahanJam;
+          const durasiPrice = this.pricing.tarikanDurasi[this.formData.durasi] || 0;
+          mancingTotal = durasiPrice * jumlahJoran;
+          mancingTotal += Number(this.formData.tambahan_jam || 0) * this.pricing.tambahanJam;
+        } else {
+          mancingTotal = this.pricing.basePrice * jumlahJoran;
         }
       }
       this.estimatedPrice = mancingTotal + sewaTotal + umpanTotal;
-      this.priceDisplay = this.formData.jenis_pemancingan === 'kiloan'
-        ? (sewaTotal + umpanTotal ? `Dihitung saat ditimbang (${this.formatRupiah(sewaTotal + umpanTotal)} tambahan)` : 'Dihitung saat ditimbang')
-        : this.formatRupiah(this.estimatedPrice);
+      this.priceDisplay = this.formatRupiah(this.estimatedPrice);
     },
 
     formatRupiah(amount) {
@@ -159,7 +167,12 @@ function fishingBookingModal(pricing = {}) {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
           },
-          body: JSON.stringify({ ...this.formData, estimasi_total: this.formData.jenis_pemancingan === 'kiloan' ? null : this.estimatedPrice })
+          body: JSON.stringify({
+            ...this.formData,
+            estimasi_total: this.formData.jenis_pemancingan === 'kiloan'
+              ? Math.max(this.estimatedPrice, 1)
+              : this.estimatedPrice
+          })
         });
         const data = await response.json();
         if (!response.ok) {
@@ -167,7 +180,8 @@ function fishingBookingModal(pricing = {}) {
           return;
         }
         this.closeModal();
-        if (typeof window.snap !== 'undefined' && data.snap_token) {
+        const isSimulationToken = typeof data.snap_token === 'string' && data.snap_token.startsWith('SIMULATION-');
+        if (typeof window.snap !== 'undefined' && data.snap_token && !isSimulationToken) {
           window.snap.pay(data.snap_token, {
             onSuccess: async () => {
               try { await fetch(`/midtrans/check-payment/${encodeURIComponent(data.order_id)}`); } catch (error) { console.error('Payment status check failed:', error); }
@@ -177,7 +191,12 @@ function fishingBookingModal(pricing = {}) {
             onError: () => alert('Pembayaran gagal. Silakan coba lagi atau hubungi kami.'),
           });
         } else {
-          window.location.href = data.redirect_url;
+          const isSimulationToken = typeof data.snap_token === 'string' && data.snap_token.startsWith('SIMULATION-');
+          if (isSimulationToken) {
+            window.location.href = data.redirect_url + '?from_payment=1';
+          } else {
+            window.location.href = data.redirect_url;
+          }
         }
       } catch (error) {
         console.error(error);

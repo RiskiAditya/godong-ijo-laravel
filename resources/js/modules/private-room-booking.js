@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || 'Booking gagal dibuat');
             closePrivateRoomModal();
-            if (result.data?.snap_token && typeof window.snap !== 'undefined') {
+            const isSimulationToken = typeof result.data?.snap_token === 'string' && result.data.snap_token.startsWith('SIMULATION-');
+            if (result.data?.snap_token && typeof window.snap !== 'undefined' && !isSimulationToken) {
                 window.snap.pay(result.data.snap_token, {
                     onSuccess: async () => {
                         try {
@@ -155,7 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     onError: () => alert('Pembayaran gagal.'),
                 });
             } else {
-                window.location.href = result.data?.redirect_url || result.redirect_url;
+                const isSimulationToken = typeof result.data?.snap_token === 'string' && result.data.snap_token.startsWith('SIMULATION-');
+                if (isSimulationToken) {
+                    window.location.href = (result.data?.redirect_url || result.redirect_url) + '?from_payment=1';
+                } else {
+                    window.location.href = result.data?.redirect_url || result.redirect_url;
+                }
             }
         } catch (submitError) {
             error.textContent = submitError.message;

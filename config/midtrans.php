@@ -38,7 +38,7 @@ return [
 
     'is_production' => env(
         'MIDTRANS_IS_PRODUCTION',
-        str_starts_with((string) env('MIDTRANS_SERVER_KEY', ''), 'Mid-server-')
+        env('APP_ENV') !== 'local'
     ),
 
     /*
@@ -75,5 +75,18 @@ return [
     */
 
     'payment_mode' => env('PAYMENT_MODE', 'live'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow Real Midtrans Calls in Automated Tests
+    |--------------------------------------------------------------------------
+    |
+    | Set to true only for tests that intentionally exercise the real Snap token
+    | flow with a mocked Midtrans client. This keeps feature tests safe by
+    | default while preserving the explicit opt-in path.
+    |
+    */
+
+    'allow_real_in_tests' => env('MIDTRANS_ALLOW_REAL_IN_TESTS', false),
 
 ];

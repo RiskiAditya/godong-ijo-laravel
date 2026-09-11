@@ -15,10 +15,15 @@ class BookingPricingService
 
         return [
             'base_price' => (float) ($fishingPaket?->harga ?? 0),
-            'komet' => 15000,
-            'umpan_jadi' => 25000,
-            'sewa_alat' => 50000,
-            'tambahan_jam' => 20000,
+            'komet' => 11000,
+            'umpan_jadi' => 11000,
+            'sewa_alat_standar' => 20000,
+            'sewa_alat_besar' => 50000,
+            'tambahan_jam' => 40000,
+            'tarikan_durasi' => [
+                '2' => 80000,
+                '4' => 110000,
+            ],
         ];
     }
 
@@ -59,11 +64,21 @@ class BookingPricingService
         }
 
         if (($data['perlu_sewa_alat'] ?? false) && ! empty($data['ukuran_joran'])) {
-            $sewaTotal += $pricing['sewa_alat'];
+            $sewaTotal += match ($data['ukuran_joran']) {
+                'standar' => (int) $pricing['sewa_alat_standar'],
+                'besar' => (int) $pricing['sewa_alat_besar'],
+                default => 0,
+            };
+        }
+
+        if (($data['jenis_pemancingan'] ?? null) === 'kiloan') {
+            return $sewaTotal + $umpanTotal;
         }
 
         if (($data['jenis_pemancingan'] ?? null) === 'tarikan') {
-            $mancingTotal = $basePrice * (int) ($data['jumlah_joran'] ?? 1);
+            $durasi = (string) ($data['durasi'] ?? '');
+            $tarikanPrice = $pricing['tarikan_durasi'][$durasi] ?? 0;
+            $mancingTotal = $tarikanPrice * (int) ($data['jumlah_joran'] ?? 1);
 
             if (! empty($data['tambahan_jam'])) {
                 $mancingTotal += (int) $data['tambahan_jam'] * $pricing['tambahan_jam'];

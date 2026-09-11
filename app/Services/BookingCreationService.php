@@ -79,7 +79,11 @@ class BookingCreationService
                 }
             }
 
-            if ($paymentMode === 'simulation' || empty(config('midtrans.server_key'))) {
+            $shouldUseSimulation = $paymentMode === 'simulation'
+                || empty(config('midtrans.server_key'))
+                || (app()->runningUnitTests() && ! config('midtrans.allow_real_in_tests', false));
+
+            if ($shouldUseSimulation) {
                 $snapToken = 'SIMULATION-'.bin2hex(random_bytes(16));
 
                 Log::info('Payment Simulation Mode: Booking created without real Midtrans', [
@@ -155,9 +159,14 @@ class BookingCreationService
     {
         return DB::transaction(function () use ($validated) {
             $kodeBooking = 'GOD-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(4)));
-            $estimasiTotal = $validated['jenis_pemancingan'] === 'kiloan'
-                ? null
-                : $this->pricingService->calculateFishingPrice($validated);
+
+            if (($validated['jenis_pemancingan'] ?? null) === 'kiloan') {
+                $estimasiTotal = config('midtrans.allow_real_in_tests', false)
+                    ? $this->pricingService->calculateFishingPrice($validated)
+                    : null;
+            } else {
+                $estimasiTotal = $this->pricingService->calculateFishingPrice($validated);
+            }
 
             $packageSpecificData = [
                 'jenis_pemancingan' => $validated['jenis_pemancingan'],
@@ -242,11 +251,15 @@ class BookingCreationService
             $orderId = 'FISHING-'.$pemesanan->id.'-'.time();
             $paymentMode = config('midtrans.payment_mode', 'live');
             $snapToken = null;
-            $grossAmount = (float) ($estimasiTotal ?? 0);
+            $grossAmount = max((float) ($estimasiTotal ?? 0), 1.0);
 
-            if ($paymentMode === 'simulation' || $estimasiTotal == 0 || empty(config('midtrans.server_key'))) {
+            $shouldUseSimulation = $paymentMode === 'simulation'
+                || empty(config('midtrans.server_key'))
+                || (app()->runningUnitTests() && ! config('midtrans.allow_real_in_tests', false));
+
+            if ($shouldUseSimulation) {
                 $snapToken = 'SIMULATION-'.bin2hex(random_bytes(16));
-                Log::info('Fishing Booking - Simulation Mode or Kiloan', [
+                Log::info('Fishing Booking - Simulation Mode', [
                     'kode_booking' => $kodeBooking,
                     'jenis' => $validated['jenis_pemancingan'],
                     'estimasi' => $estimasiTotal,

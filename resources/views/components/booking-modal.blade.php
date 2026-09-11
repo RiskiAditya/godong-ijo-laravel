@@ -327,38 +327,41 @@ function bookingModal() {
                 const data = await response.json();
                 
                 if (response.ok && data.success) {
-                    // Success - trigger Midtrans payment
+                    const snapToken = data.data?.snap_token;
+                    const isSimulationToken = typeof snapToken === 'string' && snapToken.startsWith('SIMULATION-');
+
                     this.loadingMessage = 'Membuka halaman pembayaran...';
-                    
-                    // Check if Midtrans Snap is available
+
+                    if (isSimulationToken) {
+                        this.loading = false;
+                        this.closeModal();
+                        window.location.replace(`/booking/confirmation/${data.data.kode_booking}?from_payment=1`);
+                        return;
+                    }
+
                     if (typeof window.snap === 'undefined') {
                         this.errorMessage = 'Payment gateway tidak tersedia. Silakan refresh halaman.';
                         this.loading = false;
                         return;
                     }
-                    
-                    // Open Midtrans Snap popup
-                    window.snap.pay(data.data.snap_token, {
+
+                    window.snap.pay(snapToken, {
                         onSuccess: (result) => {
                             console.log('Payment success:', result);
                             this.loading = false;
                             this.closeModal();
-                            
-                            // Show success message
+
                             alert('✅ Pembayaran berhasil!\n\nKode Booking: ' + data.data.kode_booking + '\n\nAnda akan diarahkan ke halaman konfirmasi...');
-                            
-                            // Force redirect to confirmation page
+
                             window.location.replace(`/booking/confirmation/${data.data.kode_booking}?from_payment=1`);
                         },
                         onPending: (result) => {
                             console.log('Payment pending:', result);
                             this.loading = false;
                             this.closeModal();
-                            
-                            // Show pending message
+
                             alert('⏳ Pembayaran sedang diproses.\n\nKode Booking: ' + data.data.kode_booking + '\n\nAnda akan diarahkan ke halaman konfirmasi...');
-                            
-                            // Force redirect to confirmation page
+
                             window.location.replace(`/booking/confirmation/${data.data.kode_booking}?from_payment=1`);
                         },
                         onError: (result) => {

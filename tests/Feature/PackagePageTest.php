@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Admin;
 use App\Models\PaketWisata;
 use App\Services\SEOService;
 use App\Support\PackageTypeCatalog;
@@ -54,6 +55,107 @@ class PackagePageTest extends TestCase
         });
     }
 
+    public function test_admin_package_index_includes_all_private_room_packages(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Administrator',
+            'username' => 'admin',
+            'email' => 'admin@godongijo.com',
+            'password' => bcrypt('admin123'),
+        ]);
+
+        $this->actingAs($admin, 'admin');
+
+        foreach ([
+            [
+                'nama_paket' => 'Paket Kuliner Keluarga',
+                'jenis_paket' => 'The Waterfall Resto',
+                'deskripsi' => 'Paket test 1.',
+                'harga' => 75000,
+                'kuota' => 50,
+                'is_active' => true,
+                'foto' => 'images/placeholders/asset 3.webp',
+            ],
+            [
+                'nama_paket' => 'Paket Rekreasi Keluarga',
+                'jenis_paket' => 'The Waterfall Resto',
+                'deskripsi' => 'Paket test 2.',
+                'harga' => 150000,
+                'kuota' => 80,
+                'is_active' => true,
+                'foto' => 'images/placeholders/hewan.jpg',
+            ],
+            [
+                'nama_paket' => 'Paket Sport Fishing',
+                'jenis_paket' => 'Fishing Lake',
+                'deskripsi' => 'Paket test 3.',
+                'harga' => 0,
+                'kuota' => 20,
+                'is_active' => true,
+                'foto' => 'images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp',
+            ],
+        ] as $package) {
+            PaketWisata::create($package);
+        }
+
+        foreach (['Meeting Package', 'Gathering Package', 'Wedding Package'] as $name) {
+            PaketWisata::create([
+                'nama_paket' => $name,
+                'jenis_paket' => 'Private Room',
+                'deskripsi' => 'Paket private room test.',
+                'harga' => 250000,
+                'kuota' => 100,
+                'is_active' => true,
+                'foto' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
+            ]);
+        }
+
+        $response = $this->get(route('admin.paket-wisata.index'));
+
+        PaketWisata::create([
+            'nama_paket' => 'Wedding Intimate Package',
+            'jenis_paket' => 'Private Room',
+            'deskripsi' => 'Paket extra generated for private room catalog.',
+            'harga' => 35000000,
+            'kuota' => 100,
+            'is_active' => true,
+            'foto' => 'images/Private Images/BCA-Gathering-2048x1137.webp',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertViewHas('pakets', function ($pakets): bool {
+            $names = $pakets->pluck('nama_paket')->all();
+
+            return $pakets->total() === 6
+                && in_array('Meeting Package', $names, true)
+                && in_array('Gathering Package', $names, true)
+                && in_array('Wedding Package', $names, true)
+                && ! in_array('Wedding Intimate Package', $names, true);
+        });
+    }
+
+    public function test_homepage_reactivates_fishing_card_when_existing_row_is_inactive(): void
+    {
+        PaketWisata::create([
+            'nama_paket' => 'Paket Sport Fishing',
+            'jenis_paket' => 'Fishing Lake',
+            'deskripsi' => 'Paket fishing yang sebelumnya non-aktif.',
+            'harga' => 0,
+            'kuota' => 20,
+            'is_active' => false,
+            'foto' => 'images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp',
+        ]);
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('packages', function ($packages): bool {
+            $package = collect($packages)->firstWhere('jenis_paket', 'Fishing Lake');
+
+            return $package !== null && $package['name'] === 'Paket Sport Fishing';
+        });
+    }
+
     public function test_package_slug_updates_when_name_changes(): void
     {
         $package = PaketWisata::create([
@@ -72,6 +174,18 @@ class PackagePageTest extends TestCase
         $package->refresh();
 
         $this->assertSame('paket-kuliner-keluarga-baru', $package->slug);
+    }
+
+    public function test_homepage_package_list_never_renders_empty_when_no_active_packages_exist(): void
+    {
+        $controller = app(\App\Http\Controllers\LandingPageController::class);
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('replacePrivateRoomLandingCards');
+
+        $result = $method->invoke($controller, [], collect());
+
+        $this->assertNotEmpty($result);
+        $this->assertContains('Paket Kuliner Keluarga', collect($result)->pluck('name')->all());
     }
 
     public function test_category_cache_is_cleared_when_package_type_changes(): void

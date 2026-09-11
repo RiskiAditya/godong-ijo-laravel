@@ -685,7 +685,8 @@ async function submitBookingForm(event) {
             }
             
             // Check if Midtrans Snap is available and snap_token exists
-            if (typeof window.snap !== 'undefined' && data.data.snap_token) {
+            const isSimulationToken = typeof data.data?.snap_token === 'string' && data.data.snap_token.startsWith('SIMULATION-');
+            if (typeof window.snap !== 'undefined' && data.data.snap_token && !isSimulationToken) {
                 // Open Midtrans payment
                 window.snap.pay(data.data.snap_token, {
                     onSuccess: async function(result) {
@@ -730,6 +731,12 @@ async function submitBookingForm(event) {
                     }
                 });
             } else {
+                const isSimulationToken = typeof data.data?.snap_token === 'string' && data.data.snap_token.startsWith('SIMULATION-');
+                if (isSimulationToken) {
+                    window.location.href = `/booking/confirmation/${data.data.kode_booking}?from_payment=1`;
+                    return;
+                }
+
                 if (loadingManager) {
                     loadingManager.showError('Pembayaran tidak tersedia.', 'Silakan refresh halaman dan coba lagi');
                 } else {

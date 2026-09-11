@@ -70,7 +70,7 @@
     {{-- FAQ chatbot for public visitors --}}
     <x-ai-chatbot audience="public" />
 
-    @if(Route::is('landing', 'packages.category', 'destination.show', 'booking.confirmation'))
+    @if(Route::is('landing', 'packages.category', 'destination.show', 'booking.confirmation') && config('midtrans.payment_mode') !== 'simulation')
         <script type="text/javascript" defer
                 src="https://app.{{ config('midtrans.is_production') ? '' : 'sandbox.' }}midtrans.com/snap/snap.js" 
                 data-client-key="{{ config('midtrans.client_key') }}"></script>

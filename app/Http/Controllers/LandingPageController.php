@@ -104,10 +104,37 @@ class LandingPageController extends Controller
         ];
 
         foreach ($corePackages as $package) {
-            PaketWisata::firstOrCreate(
-                ['nama_paket' => $package['nama_paket']],
-                $package + ['is_active' => true],
-            );
+            $existing = PaketWisata::where('nama_paket', $package['nama_paket'])->first();
+
+            if ($existing) {
+                $updates = [];
+
+                if (! $existing->is_active) {
+                    $updates['is_active'] = true;
+                }
+
+                foreach (['jenis_paket', 'deskripsi', 'harga', 'kuota', 'foto'] as $field) {
+                    if (empty($existing->{$field}) && ! empty($package[$field])) {
+                        $updates[$field] = $package[$field];
+                    }
+                }
+
+                if ($existing->jenis_paket === null || $existing->jenis_paket === '') {
+                    $updates['jenis_paket'] = $package['jenis_paket'];
+                }
+
+                if ($existing->foto === null || $existing->foto === '') {
+                    $updates['foto'] = $package['foto'];
+                }
+
+                if (! empty($updates)) {
+                    $existing->update($updates);
+                }
+
+                continue;
+            }
+
+            PaketWisata::create($package + ['is_active' => true]);
         }
     }
 
@@ -182,7 +209,7 @@ class LandingPageController extends Controller
         $privateRoomTarget = $pakets_db->firstWhere('jenis_paket', 'Private Room');
 
         if (! $privateRoomTarget) {
-            return $packages;
+            return $packages ?: $this->defaultLandingPackageFallback();
         }
 
         $privateRoomCards = collect(PrivateRoomPackageCatalog::cards())->map(function (array $card) use ($privateRoomTarget) {
@@ -211,10 +238,77 @@ class LandingPageController extends Controller
             ];
         })->all();
 
-        return array_values(array_merge(
-            array_filter($packages, static fn (array $package) => $package['jenis_paket'] !== 'Private Room'),
-            $privateRoomCards,
+        $filteredPackages = array_values(array_filter(
+            $packages,
+            static fn (array $package) => $package['jenis_paket'] !== 'Private Room'
         ));
+
+        $mergedPackages = array_values(array_merge($filteredPackages, $privateRoomCards));
+
+        return $mergedPackages ?: $this->defaultLandingPackageFallback();
+    }
+
+    private function defaultLandingPackageFallback(): array
+    {
+        return [
+            [
+                'id' => null,
+                'name' => 'Paket Kuliner Keluarga',
+                'jenis_paket' => 'The Waterfall Resto',
+                'duration' => 'Fleksibel',
+                'price' => 'Mulai Rp 75.000',
+                'pricePerPerson' => '/ orang',
+                'priceOriginal' => 100000,
+                'priceDiscount' => 75000,
+                'discountPercent' => 25,
+                'priceUnit' => '/ ORANG',
+                'rating' => 0.0,
+                'included' => [
+                    'Akses area The Waterfall Resto',
+                    'WiFi gratis kecepatan tinggi',
+                    'Area parkir luas + Buggy Cart',
+                ],
+                'description' => 'Nikmati pengalaman kuliner ekologis di The Waterfall Resto dengan menu Eropa dan Nusantara di tengah suasana air terjun mini yang asri.',
+                'features' => [
+                    'Menu pilihan Eropa & Nusantara',
+                    'Suasana Dine in Nature',
+                ],
+                'image' => asset('images/The Waterfall Resto Images/Tentang-TWF-2048x769.webp'),
+                'heroImage' => asset('images/The Waterfall Resto Images/Tentang-TWF-2048x769.webp'),
+                'images' => [asset('images/The Waterfall Resto Images/Tentang-TWF-2048x769.webp')],
+                'alt' => 'Paket Kuliner Keluarga',
+                'popular' => true,
+                'badge' => 'Paling Populer',
+            ],
+            [
+                'id' => null,
+                'name' => 'Paket Sport Fishing',
+                'jenis_paket' => 'Fishing Lake',
+                'duration' => 'Per Jam/Harian',
+                'price' => 'Hubungi Kami',
+                'pricePerPerson' => '',
+                'priceOriginal' => 150000,
+                'priceDiscount' => 120000,
+                'discountPercent' => 20,
+                'priceUnit' => '/ JAM',
+                'rating' => 0.0,
+                'included' => [
+                    'Akses kolam Monster Fish',
+                    'Briefing teknik mancing',
+                ],
+                'description' => 'Tantangan memancing ikan raksasa di Monster Fish Fishing Lake dengan pengalaman sport fishing yang tak terlupakan.',
+                'features' => [
+                    'Kolam pemancingan eksklusif',
+                    'Ikan berukuran raksasa',
+                ],
+                'image' => asset('images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp'),
+                'heroImage' => asset('images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp'),
+                'images' => [asset('images/placeholders/Redtail-Catfish-Ikan-Predator-Amerika-Selatan-1536x853.webp')],
+                'alt' => 'Paket Sport Fishing',
+                'popular' => false,
+                'badge' => 'Adrenalin',
+            ],
+        ];
     }
 
     private function resolvePackageImages($paket, array $staticImages = []): array

@@ -61,10 +61,67 @@
                                                     <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ ucfirst($pemesanan->package_specific_data['event_type'] ?? '-') }}</td>
                                                 </tr>
                                             @elseif(($packageType ?? null) === 'fishing-lake')
+                                                @php
+                                                    $fishingPackageData = $pemesanan->package_specific_data ?? [];
+                                                    $fishingType = $fishingPackageData['jenis_pemancingan'] ?? null;
+                                                    $fishingTypeLabel = $fishingType ? ucfirst(str_replace('_', ' ', $fishingType)) : '-';
+                                                    $fishingDurasi = $fishingPackageData['durasi'] ?? null;
+                                                    $fishingTambahanJam = (int) ($fishingPackageData['tambahan_jam'] ?? 0);
+                                                    $fishingJoran = $fishingPackageData['jumlah_joran'] ?? $pemesanan->jumlah_orang;
+                                                    $requiresRental = (bool) ($fishingPackageData['perlu_sewa_alat'] ?? false) || $fishingType === 'sewa_joran';
+                                                    $fishingRodSize = $fishingPackageData['ukuran_joran'] ?? null;
+                                                    $fishingRodSizeLabel = match ($fishingRodSize) {
+                                                        'standar' => 'Standar',
+                                                        'besar' => 'Besar',
+                                                        default => null,
+                                                    };
+                                                    $fishingUmpan = $fishingPackageData['umpan'] ?? [];
+                                                    $fishingExtraBait = [];
+                                                    if (($fishingUmpan['anak_ikan_komet'] ?? 0) > 0) {
+                                                        $fishingExtraBait[] = 'Anak Ikan Komet: ' . (int) $fishingUmpan['anak_ikan_komet'] . ' pack';
+                                                    }
+                                                    if (($fishingUmpan['umpan_jadi_godongijo'] ?? 0) > 0) {
+                                                        $fishingExtraBait[] = 'Umpan Jadi Godongijo: ' . (int) $fishingUmpan['umpan_jadi_godongijo'] . ' pack';
+                                                    }
+                                                @endphp
                                                 <tr>
                                                     <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Jenis Pemancingan</td>
-                                                    <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ ucfirst(str_replace('_', ' ', $pemesanan->package_specific_data['jenis_pemancingan'] ?? '-')) }}</td>
+                                                    <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingTypeLabel }}</td>
                                                 </tr>
+                                                @if($fishingDurasi)
+                                                    <tr>
+                                                        <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Durasi</td>
+                                                        <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingDurasi }} jam</td>
+                                                    </tr>
+                                                @endif
+                                                @if($fishingTambahanJam > 0)
+                                                    <tr>
+                                                        <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Tambahan Jam</td>
+                                                        <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingTambahanJam }} jam</td>
+                                                    </tr>
+                                                @endif
+                                                <tr>
+                                                    <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Jumlah Joran</td>
+                                                    <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingJoran }} joran</td>
+                                                </tr>
+                                                @if($requiresRental)
+                                                    <tr>
+                                                        <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Sewa Alat</td>
+                                                        <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingRodSizeLabel ? 'Ya • ' . $fishingRodSizeLabel : 'Ya' }}</td>
+                                                    </tr>
+                                                    @if($fishingRodSizeLabel)
+                                                        <tr>
+                                                            <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Ukuran Joran</td>
+                                                            <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ $fishingRodSizeLabel }}</td>
+                                                        </tr>
+                                                    @endif
+                                                @endif
+                                                @if(! empty($fishingExtraBait))
+                                                    <tr>
+                                                        <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px; vertical-align: top;">Tambahan Umpan</td>
+                                                        <td style="font-size: 14px; color: #111827; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 10px;">{{ implode(' • ', $fishingExtraBait) }}</td>
+                                                    </tr>
+                                                @endif
                                             @endif
                                             <tr>
                                                 <td style="font-size: 14px; color: #6b7280; font-weight: 600; border-top: 1px solid #e5e7eb; padding-top: 10px;">Metode Pembayaran</td>

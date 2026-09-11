@@ -77,6 +77,69 @@
                         </td>
                     </tr>
                     @endif
+                    @if(($booking->paketWisata?->jenis_paket ?? null) === 'Fishing Lake')
+                        @php
+                            $adminFishingData = $booking->package_specific_data ?? [];
+                            $adminFishingType = $adminFishingData['jenis_pemancingan'] ?? null;
+                            $adminFishingTypeLabel = $adminFishingType ? ucfirst(str_replace('_', ' ', $adminFishingType)) : '-';
+                            $adminFishingDurasi = $adminFishingData['durasi'] ?? null;
+                            $adminFishingTambahanJam = (int) ($adminFishingData['tambahan_jam'] ?? 0);
+                            $adminFishingJoran = $adminFishingData['jumlah_joran'] ?? $booking->jumlah_orang;
+                            $adminFishingRodSize = $adminFishingData['ukuran_joran'] ?? null;
+                            $adminFishingRodSizeLabel = match ($adminFishingRodSize) {
+                                'standar' => 'Standar',
+                                'besar' => 'Besar',
+                                default => null,
+                            };
+                            $adminFishingRequiresRental = (bool) ($adminFishingData['perlu_sewa_alat'] ?? false) || $adminFishingType === 'sewa_joran';
+                            $adminFishingBait = $adminFishingData['umpan'] ?? [];
+                            $adminFishingExtraBait = [];
+                            if (($adminFishingBait['anak_ikan_komet'] ?? 0) > 0) {
+                                $adminFishingExtraBait[] = 'Anak Ikan Komet: ' . (int) $adminFishingBait['anak_ikan_komet'] . ' pack';
+                            }
+                            if (($adminFishingBait['umpan_jadi_godongijo'] ?? 0) > 0) {
+                                $adminFishingExtraBait[] = 'Umpan Jadi Godongijo: ' . (int) $adminFishingBait['umpan_jadi_godongijo'] . ' pack';
+                            }
+                        @endphp
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Jenis Pemancingan</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingTypeLabel }}</td>
+                        </tr>
+                        @if($adminFishingDurasi)
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Durasi</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingDurasi }} jam</td>
+                        </tr>
+                        @endif
+                        @if($adminFishingTambahanJam > 0)
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Tambahan Jam</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingTambahanJam }} jam</td>
+                        </tr>
+                        @endif
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Jumlah Joran</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingJoran }} joran</td>
+                        </tr>
+                        @if($adminFishingRequiresRental)
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Sewa Alat</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingRodSizeLabel ? 'Ya • ' . $adminFishingRodSizeLabel : 'Ya' }}</td>
+                        </tr>
+                        @endif
+                        @if($adminFishingRodSizeLabel)
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Ukuran Joran</td>
+                            <td style="padding: 10px 0;">{{ $adminFishingRodSizeLabel }}</td>
+                        </tr>
+                        @endif
+                        @if(! empty($adminFishingExtraBait))
+                        <tr>
+                            <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600; vertical-align: top;">Tambahan Umpan</td>
+                            <td style="padding: 10px 0;">{{ implode(' • ', $adminFishingExtraBait) }}</td>
+                        </tr>
+                        @endif
+                    @endif
                     <tr>
                         <td style="padding: 10px 0; color: var(--ink-45); font-size: 12.5px; font-weight: 600;">Jumlah Orang</td>
                         <td style="padding: 10px 0;">{{ $booking->jumlah_orang }} orang</td>

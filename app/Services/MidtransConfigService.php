@@ -8,12 +8,30 @@ class MidtransConfigService
 {
     public function configure(): void
     {
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = config('midtrans.is_production');
+        $environment = config('app.env');
+        $serverKey = trim((string) config('midtrans.server_key', ''));
+        $paymentMode = config('midtrans.payment_mode', 'live');
+        $isSandboxKey = $serverKey !== '' && str_starts_with($serverKey, 'SB-Mid-server-');
+        $isProductionKey = $serverKey !== '' && ! $isSandboxKey;
+
+        if ($environment === 'local') {
+            config()->set('midtrans.is_production', false);
+            config()->set('midtrans.payment_mode', 'live');
+        } elseif ($serverKey !== '' && $isSandboxKey) {
+            config()->set('midtrans.payment_mode', 'live');
+            config()->set('midtrans.is_production', false);
+        } elseif ($paymentMode === 'live' && $isProductionKey) {
+            config()->set('midtrans.is_production', true);
+        } elseif ($paymentMode === 'simulation' && $serverKey === '') {
+            config()->set('midtrans.is_production', false);
+        }
+
+        Config::$serverKey = $serverKey;
+        Config::$isProduction = (bool) config('midtrans.is_production', $environment !== 'local');
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
 
-        if (config('app.env') === 'local') {
+        if ($environment === 'local') {
             Config::$curlOptions = [
                 CURLOPT_HTTPHEADER => [],
                 CURLOPT_SSL_VERIFYHOST => 0,
