@@ -206,13 +206,16 @@ class LandingPageController extends Controller
 
     private function replacePrivateRoomLandingCards(array $packages, $pakets_db): array
     {
-        $privateRoomTarget = $pakets_db->firstWhere('jenis_paket', 'Private Room');
+        $privateRoomTargets = $pakets_db->where('jenis_paket', 'Private Room');
 
-        if (! $privateRoomTarget) {
+        if ($privateRoomTargets->isEmpty()) {
             return $packages ?: $this->defaultLandingPackageFallback();
         }
 
-        $privateRoomCards = collect(PrivateRoomPackageCatalog::cards())->map(function (array $card) use ($privateRoomTarget) {
+        $privateRoomCards = collect(PrivateRoomPackageCatalog::cards())->map(function (array $card) use ($privateRoomTargets) {
+            $privateRoomTarget = $privateRoomTargets->firstWhere('nama_paket', $card['name'])
+                ?? $privateRoomTargets->first();
+
             return [
                 'id' => $privateRoomTarget->id,
                 'name' => $card['name'],

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PaketWisata;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 
 class PaketWisataController extends Controller
@@ -53,7 +54,17 @@ class PaketWisataController extends Controller
             $query->where('is_active', $isActive);
         }
         
-        $pakets = $query->latest()->paginate(20);
+        $allPackages = $query->latest()->get()->unique('nama_paket')->values();
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 20;
+        $pakets = new LengthAwarePaginator(
+            $allPackages->forPage($currentPage, $perPage)->values(),
+            $allPackages->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+        $pakets->appends($request->query());
         
         return view('admin.packages.index', compact('pakets'));
     }

@@ -80,9 +80,6 @@
         <section class="packages-section">
             <div class="packages-grid horizontal-scroll">
                 @if($category === 'private-room')
-                    @php
-                        $privateRoomTarget = $packages->first();
-                    @endphp
                     @foreach($privateRoomCards as $privateCard)
                         <article class="package-card private-room-category-card">
                             <div class="package-image">
@@ -101,6 +98,10 @@
                                         <li>{{ $privateOption['label'] }}</li>
                                     @endforeach
                                 </ul>
+                                @php
+                                    $privateRoomTarget = $packages->firstWhere('nama_paket', $privateCard['name'])
+                                        ?? $packages->first();
+                                @endphp
                                 @if($privateRoomTarget)
                                     @php
                                         $privateBookingConfig = [
