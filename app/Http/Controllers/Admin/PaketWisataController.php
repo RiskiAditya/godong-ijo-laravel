@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaketWisata;
+use App\Support\PrivateRoomPackageCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Storage;
 
 class PaketWisataController extends Controller
 {
@@ -15,6 +15,8 @@ class PaketWisataController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensurePrivateRoomPackagesExist();
+
         $query = PaketWisata::withCount('pemesanan');
 
         $query->where(function ($packageQuery) {
@@ -67,6 +69,32 @@ class PaketWisataController extends Controller
         $pakets->appends($request->query());
         
         return view('admin.packages.index', compact('pakets'));
+    }
+
+    private function ensurePrivateRoomPackagesExist(): void
+    {
+        foreach (PrivateRoomPackageCatalog::cards() as $card) {
+            PaketWisata::firstOrCreate(
+                [
+                    'nama_paket' => $card['name'],
+                    'jenis_paket' => 'Private Room',
+                ],
+                [
+                    'deskripsi' => $card['description'],
+                    'foto' => $card['image'],
+                    'harga' => 0,
+                    'kuota' => 100,
+                    'is_active' => true,
+                    'booking_config' => [
+                        'price_type' => 'package',
+                        'minimum_pax' => 1,
+                        'event_type' => $card['options'][0]['event'],
+                        'duration' => 'package',
+                        'private_room_options' => $card['options'],
+                    ],
+                ]
+            );
+        }
     }
 
     /**
