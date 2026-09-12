@@ -26,9 +26,9 @@ class PackagesCarousel {
     init() {
         if (!this.carousel) return;
         
-        // Count original cards (not duplicates)
+        // Count the cards rendered by the landing page.
         const allCards = this.carousel.querySelectorAll('.package-card');
-        this.totalCards = allCards.length / 2; // Divided by 2 because cards are duplicated
+        this.totalCards = allCards.length;
         
         // Hide dots container if exists
         const dotsContainer = document.querySelector('#packages-dots');

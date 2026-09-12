@@ -428,7 +428,7 @@ class EmailService implements IEmailService
         // Extract SMTP error code if available
         $errorCode = $this->extractSmtpErrorCode($e->getMessage());
         
-        Log::error('Email sending failed', [
+        $context = [
             'type' => $type,
             'recipient' => $recipient,
             'booking_code' => $bookingCode,
@@ -438,7 +438,10 @@ class EmailService implements IEmailService
             'timestamp' => now()->toIso8601String(),
             'date' => now()->format('Y-m-d'),
             'trace' => $e->getTraceAsString(),
-        ]);
+        ];
+
+        Log::channel('email_errors')->error('Email sending failed', $context);
+        Log::channel('stderr')->error('Email sending failed', $context);
     }
     
     /**
@@ -451,8 +454,8 @@ class EmailService implements IEmailService
      */
     protected function extractSmtpErrorCode(string $message): ?string
     {
-        // Match common SMTP error codes (3-digit numbers)
-        if (preg_match('/\b([45]\d{2})\b/', $message, $matches)) {
+        // Match SMTP response codes, not unrelated values such as port 587.
+        if (preg_match('/\b(421|450|451|452|454|500|501|502|503|504|521|530|535|550|551|552|553|554)\b/', $message, $matches)) {
             return $matches[1];
         }
         
