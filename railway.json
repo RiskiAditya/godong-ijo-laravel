@@ -5,6 +5,7 @@
     "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build"
   },
   "deploy": {
+    "preDeployCommand": "php artisan migrate --force",
     "startCommand": "mkdir -p storage/framework/sessions storage/framework/cache storage/framework/views storage/logs && touch storage/logs/scheduler.log && chmod -R 775 storage && export SESSION_DRIVER=cookie SESSION_SECURE_COOKIE=true ASSET_URL=https://godong-ijo-laravel-production.up.railway.app && php artisan schedule:work --no-interaction > storage/logs/scheduler.log 2>&1 & exec php -S 0.0.0.0:$PORT -t public",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
