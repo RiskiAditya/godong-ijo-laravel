@@ -181,6 +181,7 @@ class LandingPageController extends Controller
                 'id' => $paket->id,
                 'name' => $paket->nama_paket,
                 'jenis_paket' => $paket->jenis_paket,
+                'priceValue' => (float) $paket->final_price,
                 'duration' => $static['duration'],
                 'price' => $price,
                 'pricePerPerson' => $pricePerPerson,

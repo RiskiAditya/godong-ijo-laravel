@@ -251,7 +251,7 @@
                                                 data-booking-type="generic"
                                                 data-package-id="{{ $package['id'] }}"
                                                 data-package-name="{{ addslashes($package['name']) }}"
-                                                data-package-price="{{ $package['priceDiscount'] > 0 ? $package['priceDiscount'] : ($package['priceOriginal'] > 0 ? $package['priceOriginal'] : 0) }}">
+                                                data-package-price="{{ $package['priceValue'] }}">
                                                 Pesan
                                             </button>
                                         @endif
