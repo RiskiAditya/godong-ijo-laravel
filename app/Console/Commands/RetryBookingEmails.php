@@ -6,6 +6,7 @@ use App\Models\Pemesanan;
 use App\Models\SystemSetting;
 use App\Services\BookingEmailNotificationService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class RetryBookingEmails extends Command
@@ -73,6 +74,7 @@ class RetryBookingEmails extends Command
 
                         if ($this->option('dry-run')) {
                             $this->line("[DRY RUN] {$sentAtColumn}: {$booking->kode_booking} -> {$booking->email}");
+
                             continue;
                         }
 
@@ -104,7 +106,7 @@ class RetryBookingEmails extends Command
         Pemesanan $booking,
         string $sentAtColumn,
         int $maxAttempts,
-        \Illuminate\Support\Carbon $retryBefore,
+        Carbon $retryBefore,
     ): bool {
         if ($booking->getAttribute($sentAtColumn)) {
             return false;
