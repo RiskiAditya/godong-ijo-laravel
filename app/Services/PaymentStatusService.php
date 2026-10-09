@@ -29,12 +29,12 @@ class PaymentStatusService
             return null;
         }
 
-        return DB::transaction(function () use (
+        [$updatedPayment, $bookingToNotify] = DB::transaction(function () use (
             $pembayaran,
             $status,
             $paymentType,
             $transactionId,
-        ): Pembayaran {
+        ): array {
             $lockedPayment = Pembayaran::query()
                 ->with('pemesanan')
                 ->lockForUpdate()
@@ -53,7 +53,6 @@ class PaymentStatusService
 
             if ($status === 'success' && ! $wasSuccessful && $booking) {
                 $booking->markAsPaid();
-                $this->bookingEmailNotifications->paymentSuccess($booking);
                 $this->notificationService->createPaymentNotification($booking);
             }
 
@@ -73,8 +72,19 @@ class PaymentStatusService
                 }
             }
 
-            return $lockedPayment->fresh();
+            return [
+                $lockedPayment->fresh(),
+                $status === 'success' && ! $wasSuccessful ? $booking : null,
+            ];
         });
+
+        if ($bookingToNotify) {
+            $this->bookingEmailNotifications->paymentSuccess(
+                $bookingToNotify->fresh(['paketWisata', 'jadwal', 'pembayaran']),
+            );
+        }
+
+        return $updatedPayment;
     }
 
     private function mapStatus(string $transactionStatus, ?string $fraudStatus): string

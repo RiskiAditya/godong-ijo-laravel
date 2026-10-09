@@ -294,9 +294,11 @@ class MidtransConfigurationTest extends TestCase
             $notificationService,
         );
 
+        $transactionLevelBeforeApply = \Illuminate\Support\Facades\DB::transactionLevel();
         $bookingEmailNotifications->expects($this->once())
             ->method('paymentSuccess')
-            ->with($this->callback(fn ($model) => $model->id === $booking->id));
+            ->with($this->callback(fn ($model) => $model->id === $booking->id
+                && \Illuminate\Support\Facades\DB::transactionLevel() === $transactionLevelBeforeApply));
 
         $notificationService->expects($this->once())
             ->method('createPaymentNotification')

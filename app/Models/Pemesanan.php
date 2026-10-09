@@ -36,7 +36,23 @@ class Pemesanan extends Model
         'tanggal_kunjungan' => 'date',
         'reminder_sent_at' => 'datetime',
         'review_sent_at' => 'datetime',
+        'booking_confirmation_email_sent_at' => 'datetime',
+        'booking_confirmation_email_attempts' => 'integer',
+        'booking_confirmation_email_last_attempt_at' => 'datetime',
+        'payment_success_email_sent_at' => 'datetime',
+        'payment_success_email_attempts' => 'integer',
+        'payment_success_email_last_attempt_at' => 'datetime',
+        'booking_confirmation_email_tracking_enabled' => 'boolean',
+        'payment_success_email_tracking_enabled' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $booking): void {
+            $booking->booking_confirmation_email_tracking_enabled ??= true;
+            $booking->payment_success_email_tracking_enabled ??= true;
+        });
+    }
     
     /**
      * Get user (nullable for guest bookings)
